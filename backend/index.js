@@ -190,7 +190,7 @@ app.post("/availability", (req,res)=>{
 
 app.get("/availability/:id", (req,res)=>{
     const q = "SELECT * FROM Availability WHERE id = ?"
-    const appointmentId = req.params.id;
+    const availabilityId = req.params.id;
 
     db.query(q,[availabilityId], (err,data)=>{
         if(err) return res.json(err)
@@ -224,8 +224,24 @@ app.put("/availability/:id", (req,res)=>{
 
 //TODO customer/search **************************
 
+app.get("/customers/:id", (req,res)=>{
+    const q = "SELECT * FROM Customer WHERE id = ?"
+    const customerId = req.params.id;
 
+    db.query(q,[customerId], (err,data)=>{
+        if(err) return res.json(err)
+        return res.json(data)
+    });
+})
 
+app.get("/customers/", (req,res)=>{
+    const q = "SELECT * FROM Customer"
+
+    db.query(q, (err,data)=>{
+        if(err) return res.json(err)
+        return res.json(data)
+    });
+})
 
 
 // LISTEN

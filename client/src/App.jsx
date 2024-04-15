@@ -4,14 +4,14 @@ import {
   Routes,
   Route
 } from "react-router-dom"
-import HomePage from './pages/HomePage'
-import RegistrationPage from './pages/RegistrationPage'
-import CustomerPage from './pages/CustomerPage'
-import AppointmentPage from './pages/AppointmentPage'
-import AvailabilityPage from './pages/AvailabilityPage'
-import PasswordPage from './pages/PasswordPage'
-import LoginPage from './pages/LoginPage'
-import ManagerHomePage from './pages/ManagerHomePage'
+import HomePage from './pages/HomePage.jsx'
+import RegistrationPage from './pages/RegistrationPage.jsx'
+import CustomerPage from './pages/CustomerPage.jsx'
+import AppointmentPage from './pages/AppointmentPage.jsx'
+import AvailabilityPage from './pages/AvailabilityPage.jsx'
+import PasswordPage from './pages/PasswordPage.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import ManagerHomePage from './pages/ManagerHomePage.jsx'
 //import "./style.css"
 
 function App() {
