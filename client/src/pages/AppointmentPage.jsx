@@ -1,225 +1,337 @@
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Title from "../components/Title";
-import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
 import { Link } from "react-router-dom";
-import { Button, TextField, Select, MenuItem} from "@mui/material";
-import Typography from '@mui/material/Typography';
-
+import { Box, Button, TextField } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import { useParams, useNavigate} from "react-router-dom";
+import dayjs from "dayjs";
+import { TimeField } from "@mui/x-date-pickers/TimeField";
+import { DateField } from "@mui/x-date-pickers/DateField";
+import { FormControl } from "@mui/base/FormControl";
+import {Select, MenuItem} from "@mui/material/"
 
 const AppointmentPage = () => {
+  const localHost = "http://localhost:8800";
+
+  const { id } = useParams();
+  const [appt, setAppt] = useState({
+    id: "",
+    date: "",
+    startTime: "",
+    endTime: "",
+    customerId: "",
+    employeeId: "",
+    status: "",
+  });
+  const [customers, setCustomers] = useState([]);
+  const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
   const columns = [
     { field: "id", headerName: "ID", width: 45 },
-
     {
-      field: "Customer",
+      field: "Name",
       headerName: "Customer",
-      description: "This column has a value getter and is not sortable.",
-      sortable: false,
+      sortable: true,
       width: 120,
-      // valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
+      valueGetter: (value, row) =>
+        `${row.firstName || ""} ${row.lastName || ""}`,
     },
     {
-      field: "Email",
+      field: "email",
       headerName: "Email",
-      description: "This column has a value getter and is not sortable.",
-      sortable: false,
+      sortable: true,
       width: 120,
-      // valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
     },
     {
-      field: "Address",
+      field: "address",
       headerName: "Address",
-      description: "This column has a value getter and is not sortable.",
       sortable: false,
-      width: 120,
-      // valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
-    },
-    {
-      field: "A",
-      headerName: "A",
-      description: "This column has a value getter and is not sortable.",
-      sortable: false,
-      width: 120,
-      // valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
-    },
-    {
-      field: "Ad",
-      headerName: "Ad",
-      description: "This column has a value getter and is not sortable.",
-      sortable: false,
-      width: 120,
-      // valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
+      width: 250,
+      valueGetter: (value, row) =>
+        `${row.street || ""} ${row.city || ""} ${row.state || ""}`,
     },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      Customer: "John Doe",
-      Email: "jd@email.com",
-      Address: "123 Main",
-      A: "city",
-      Ad: "NY",
-    },
-    {
-      id: 2,
-      Customer: "John Doe",
-      Email: "jd@email.com",
-      Address: "123 Main",
-      A: "city",
-      Ad: "NY",
-    },
-    {
-      id: 3,
-      Customer: "John Doe",
-      Email: "jd@email.com",
-      Address: "123 Main",
-      A: "city",
-      Ad: "NY",
-    },
-  ];
-  // Start
-  const [selectedHour, setSelectedHour] = useState("");
-  const [selectedMinute, setSelectedMinute] = useState("");
-  const [selectedMeridiem, setSelectedMeridiem] = useState("");
-  // End
-  const [selectedEndHour, setSelectedEndHour] = useState("");
-  const [selectedEndMinute, setSelectedEndMinute] = useState("");
-  const [selectedEndMeridiem, setSelectedEndMeridiem] = useState("");
+  const rows = customers.map((row) => {
+    return {
+      city: row.city,
+      email: row.email,
+      firstName: row.firstName,
+      id: row.id,
+      lastName: row.lastName,
+      state: row.state,
+      street: row.street,
+    };
+  });
 
-  const handleSubmit = (event) => {
-    // Handle form submission
-    console.log("Submit has been clicked in appts");
+  const navigate = useNavigate()
+  // Gets appointment details from DB
+  // Change data types from String to Date
+  useEffect(() => {
+    const fetchApptDetails = async () => {
+      try {
+        const res1 = await axios.get(localHost + "/appointments/" + id);
+        const apptCustomerId = res1.data[0].customerId;
+        const res2 = await axios.get(localHost + "/customers/");
+        console.log("useEffect triggered");
+
+        setAppt(res1.data[0]);
+        setCustomers(res2.data);
+        setRowSelectionModel(apptCustomerId);
+      } catch (err) {
+        console.log("Error retrieving appointment details: " + err);
+      }
+    };
+    fetchApptDetails();
+  }, []);
+
+  const handleChange = (id, e) => {
+    //console.log("handleChange triggered =>");
+    //console.log("id: " + id + " e: " + e) 
+    //console.log(appt)
+    
+    setAppt((prev) => ({ ...prev, [id]: e }));
+    console.log("After set: ")
+    console.log(appt)
+  };
+
+  const handleSubmit = async (e) => {
+      e.preventDefault()
+      appt.date = appt.date.substring(0,10)
+      console.log("In submit: ")
+      console.log(appt.date)
+      
+     //const errors = validateForm(appt)
+      //Object.keys(errors).length === 0
+      //console.log(errors)
+      // return
+      try{
+        const res = await axios.put(localHost+"/appointments/"+id, appt)
+        console.log("res")
+        console.log(res)
+        //navigate("/home")
+      }catch(err){
+        console.log(err)
+      }
+  }
+
+
+  const validateForm = (appt) => {
+    const errors = {};
+
+    if (!appt.date){
+      errors.date = "Date is required"
+    }
+    if(!appt.startTime){
+      errors.startTime = "Start Time is required"
+    }
+    if(!appt.endTime){
+      errors.endTime = "End Time is required"
+    }
+    if(!appt.customerId){
+      errors.customerId = "Customer is required"
+    }
+    if(!appt.employeeId){
+      errors.employeeId = "Employee is required"
+    }
+    if(appt.date === "Invalid Date"){
+      errors.date = "Invalid Date"
+    }
+    if(appt.startTime === "Invalid Date"){
+      errors.startTime = "Invalid Start Time"
+    }
+    if(appt.endTime === "Invalid Date"){
+      errors.endTime = "Invalid End Time"
+    }
+
+    // Check if username is empty
+    // if (
+    //   appt.date && 
+    //   appt.customerId && 
+    //   appt.employeeId && 
+    //   appt.startTime &&
+    //   appt.endTime) {
+    //   errors.username = "Username is required";
+    // }
+
+    // Check if password is empty
+    // if (!formData.password) {
+    //   errors.password = "Password is required";
+    // }
+
+    // setFormData((prevState) => ({ ...prevState, errors }));
+
+    // Return true if there are no errors
+    // return Object.keys(errors).length === 0;
+    return errors
   };
   return (
     <>
-      <Grid container direction="column" alignItems="center" sx={{ p: 3 }}>
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Box sx={{ pt: 3}} display="flex" flexDirection="column" alignItems="center">
-            <Typography variant="h3" color="primary" gutterBottom >Appointment</Typography>
-          </Box>
-          <Grid container direction="row" alignItems="center" sx={{ p: 2 }}>
-            <Grid item xs={12} md={6} lg={6} alignItems="center" sx={{ p: 3 }}>
-              <Title>Customer</Title>
-              <Box display="flex" flexDirection="column" alignItems="center">
-                <Box sx={{ height: 350, width: "100%" }}>
-                  <DataGrid
-                    rows={rows}
-                    columns={columns}
-                    initialState={{
-                      pagination: {
-                        paginationModel: {
-                          pageSize: 5,
-                        },
-                      },
-                    }}
-                    pageSizeOptions={[5]}
-                  />
-                </Box>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={6} lg={6} alignItems="center" sx={{ p: 3 }}>
-              <Box>
-                <Title>Employee</Title>
-                <TextField
-                  disabled
-                  id="filled-disabled"
-                  defaultValue="Current Employee"
-                  variant="filled"
-                />
-                <Title>Date</Title>
-                <TextField
-                  id="outlined-basic"
-                  label="YYYY-MM-DD"
-                  variant="outlined"
-                />
-                
-                <Grid item sm={12} md={12} lg={12}>
-                  <Title>Start</Title>
-                  {/* Hour */}
-                  <Select value={selectedHour} style={{ minWidth: 120 }}>
-                    <MenuItem value="">Select Hour</MenuItem>
-                    {Array.from(Array(12).keys()).map((hour) => (
-                      <MenuItem key={hour + 1} value={hour + 1}>
-                        {hour + 1}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {/* Minute */}
-                  <Select value={selectedMinute} style={{ minWidth: 120 }}>
-                    <MenuItem value="">Select Minute</MenuItem>
-                    {["00", "15", "30", "45"].map((minute) => (
-                      <MenuItem key={minute} value={minute}>
-                        {minute}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {/* AM/PM */}
-                  <Select value={selectedMeridiem} style={{ minWidth: 120 }}>
-                    <MenuItem value="">Select</MenuItem>
-                    {["AM", "PM"].map((meridiem) => (
-                      <MenuItem key={meridiem} value={meridiem}>
-                        {meridiem}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-                <Grid item sm={12} md={12} lg={12}>
-                  <Title>End</Title>
+      <form id="form" onSubmit={(e)=>{
+        handleSubmit(e)
+        }}>
+        <Grid container direction="column" alignItems="center" sx={{ p: 3 }}>
+          <Paper elevation={3} sx={{ p: 3, minWidth: "60%" }}>
+            <Box
+              sx={{ pt: 3 }}
+              display="flex"
+              flexDirection="column"
+              alignItems="center"
+            >
+              <Typography variant="h3" color="primary" gutterBottom>
+                Appointment
+              </Typography>
+            </Box>
 
-                  {/* Hour */}
-                  <Select value={selectedEndHour} style={{ minWidth: 120 }}>
-                    <MenuItem value="">Select Hour</MenuItem>
-                    {Array.from(Array(12).keys()).map((hour) => (
-                      <MenuItem key={hour + 1} value={hour + 1}>
-                        {hour + 1}
+            <Grid container direction="row" alignItems="center" sx={{ p: 2 }}>
+              <Grid
+                item
+                xs={12}
+                md={8}
+                lg={8}
+                alignItems="center"
+                sx={{ p: 3 }}
+              >
+                <Title>Customer</Title>
+                <Box display="flex" flexDirection="column" alignItems="center">
+                  <Box sx={{ height: 350, width: "100%" }}>
+                    <DataGrid
+                    name=""
+                      rows={rows}
+                      columns={columns}
+                      initialState={{
+                        pagination: {
+                          paginationModel: {
+                            pageSize: 5,
+                          },
+                        },
+                      }}
+                      columnVisibilityModel={{
+                        id: false,
+                      }}
+                      checkboxSelection
+                      disableMultipleRowSelection={true}
+                      onRowSelectionModelChange={(newRowSelectionModel) => {
+                        setRowSelectionModel(newRowSelectionModel);
+                        handleChange("customerId",newRowSelectionModel[0])
+                      }}
+                      rowSelectionModel={rowSelectionModel}
+                      pageSizeOptions={[5]}
+                    />
+                  </Box>
+                </Box>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                md={4}
+                lg={4}
+                alignItems="center"
+                sx={{ p: 3 }}
+              >
+                <Box>
+                  <Title>Status</Title>
+                  <Select 
+                  name="status"
+                  id="status"
+                  onChange={(event) => {
+                    //console.log("Status=>:"+event.target.value)
+                    handleChange("status", event.target.value);
+                  }}
+                  value={appt.status} style={{ minWidth: 120 }}>
+                    <MenuItem value="">Select Status</MenuItem>
+                    {["scheduled", "completed", "cancelled"].map((status) => (
+                      <MenuItem key={status} value={status}>
+                        {status}
                       </MenuItem>
                     ))}
                   </Select>
-                  {/* Minute */}
-                  <Select value={selectedEndMinute} style={{ minWidth: 120 }}>
-                    <MenuItem value="">Select Minute</MenuItem>
-                    {["00", "15", "30", "45"].map((minute) => (
-                      <MenuItem key={minute} value={minute}>
-                        {minute}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {/* AM/PM */}
-                  <Select value={selectedEndMeridiem} style={{ minWidth: 120 }}>
-                    <MenuItem value="">Select</MenuItem>
-                    {["AM", "PM"].map((meridiem) => (
-                      <MenuItem key={meridiem} value={meridiem}>
-                        {meridiem}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </Grid>
-              </Box>
+                  {/* <FormControl>
+                    <TextField
+                      name = "status"
+                      onChange={handleChange}
+                      id="status"
+                      variant="filled"
+                      value={appt.status}
+                    />
+                  </FormControl> */}
+                  <FormControl required>
+                    <Title>Date</Title>
+                    <DateField
+                      id="date"
+                      name="date"
+                      variant="outlined"
+                      //format="YYYY-MM-DD"
+                      onChange={(event) => {
+                        handleChange("date", dayjs(event).format("YYYY-MM-DD"));
+                      }}
+
+                      value={dayjs(appt.date)}
+                    />
+                  </FormControl>
+                  <Grid item sm={12} md={12} lg={12}>
+                    <Title>Start Time</Title>
+                    <TimeField
+                    name="startTime"
+                      id="startTime"
+                      format="hh:mm a"
+                      value={dayjs(appt.startTime, "HH:mm:ss")}
+                      onChange={(event) => {
+                        handleChange(
+                          "startTime",
+                          dayjs(event).format("HH:mm:ss")
+                        );
+                      }}
+                    />
+                  </Grid>
+                  <Grid item sm={12} md={12} lg={12}>
+                    <Title>End Time</Title>
+                    <TimeField
+                    name="endTime"
+                      id="endTime"
+                      format="hh:mm a"
+                      value={dayjs(appt.endTime, "HH:mm:ss")}
+                      onChange={(event) => {
+                        handleChange(
+                          "endTime",
+                          dayjs(event).format("HH:mm:ss")
+                        );
+                      }}
+                    />
+                  </Grid>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-          <Box mt={3} mb={2} display="flex" justifyContent="center" width="100%">
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Link to="/home" style={{ textDecoration: "none" }}>
+            <Box
+              mt={3}
+              mb={2}
+              display="flex"
+              justifyContent="center"
+              width="100%"
+            >
+              <Stack direction="row" spacing={2} alignItems="center">
+                {/* <Link to="/home" style={{ textDecoration: "none" }}> */}
                 <Button
-                  onClick={handleSubmit}
+                  // onClick={handleSubmit}
                   type="submit"
                   variant="contained"
+                  id="submitButton"
                 >
                   Submit
                 </Button>
-              </Link>
-              <Link to="/home" style={{ textDecoration: "none" }}>
-                <Button variant="contained">Cancel</Button>
-              </Link>
-            </Stack>
-          </Box>
-        </Paper>
-      </Grid>
+                {/* </Link> */}
+                <Link to="/home" style={{ textDecoration: "none" }}>
+                  <Button variant="contained">Cancel</Button>
+                </Link>
+              </Stack>
+            </Box>
+          </Paper>
+        </Grid>
+      </form>
     </>
   );
 };

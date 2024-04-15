@@ -1,4 +1,5 @@
-import * as React from "react";
+import { React, useEffect, useState } from "react";
+import axios from "axios";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
@@ -12,7 +13,9 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Title from "../components/Title";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { Link } from "react-router-dom";
+// import Tester from "../components/Tester";
 
 const HomePage = () => {
   const NavBar = styled(MuiAppBar, {
@@ -25,10 +28,10 @@ const HomePage = () => {
     }),
   }));
 
-  const columns = [
+  const appointmentColumns = [
     { field: "id", headerName: "ID", width: 45 },
     {
-      field: "Date",
+      field: "date",
       headerName: "Date",
       width: 100,
       editable: true,
@@ -46,16 +49,22 @@ const HomePage = () => {
       editable: true,
     },
     {
-      field: "Customer",
-      headerName: "Customer",
+      field: "employeeId",
+      headerName: "EmployeeID",
       description: "This column has a value getter and is not sortable.",
       sortable: false,
       width: 120,
       // valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
     },
     {
-      field: "Employee",
-      headerName: "Employee",
+      field: "status",
+      headerName: "Status",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "customerId",
+      headerName: "CustomerId",
       description: "This column has a value getter and is not sortable.",
       sortable: false,
       width: 120,
@@ -138,7 +147,79 @@ const HomePage = () => {
     { id: 6, Day: "Saturday", start: "08:00:00", end: "08:00:00" },
     { id: 7, Day: "Sunday", start: "08:00:00", end: "08:00:00" },
   ];
+  const rows3 = [
+    { id: 1, Day: "Monday", start: "08:00:00", end: "08:00:00" },
+    { id: 2, Day: "Tuesday", start: "08:00:00", end: "08:00:00" },
+    { id: 3, Day: "Wednesday", start: "08:00:00", end: "08:00:00" },
+    { id: 4, Day: "Thursday", start: "08:00:00", end: "08:00:00" },
+    { id: 5, Day: "Friday", start: "08:00:00", end: "08:00:00" },
+    { id: 6, Day: "Saturday", start: "08:00:00", end: "08:00:00" },
+    { id: 7, Day: "Sunday", start: "08:00:00", end: "08:00:00" },
+  ];
+  const columns3 = [
+    { field: "id", headerName: "ID", width: 1 },
+    {
+      field: "day",
+      headerName: "Day",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "startTime",
+      headerName: "Start Time",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "endTime",
+      headerName: "End Time",
+      width: 100,
+      editable: true,
+    },
+    {
+      field: "employeeId",
+      headerName: "Employee ID",
+      width: 100,
+      editable: true,
+    },
+  ];
+
   const defaultTheme = createTheme();
+
+  const localHost = "http://localhost:8800";
+
+  //Get availability for all employees
+  const [availabilityList, setAvailabilityList] = useState([]);
+  useEffect(() => {
+    const fetchAvailabilityList = async () => {
+      try {
+        const res = await axios.get(localHost + "/availability/");
+        console.log(res);
+        setAvailabilityList(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchAvailabilityList();
+  }, []);
+
+  //Get appointments for all employees
+  const [appointmentList, setAppointmentList] = useState([]);
+  useEffect(() => {
+    const fetchAppointmentList = async () => {
+      try {
+        const res = await axios.get(localHost + "/appointments/");
+        console.log(res);
+        setAppointmentList(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchAppointmentList();
+  }, []);
+
+
+  const [rowSelectionModel, setRowSelectionModel] = useState([]);
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -192,26 +273,36 @@ const HomePage = () => {
                   <Title>Appointments</Title>
                   <Box sx={{ height: 300, width: "100%" }}>
                     <DataGrid
-                      rows={rows}
-                      columns={columns}
-                      initialState={{
-                        pagination: {
-                          paginationModel: {
-                            pageSize: 5,
-                          },
+                      rows={appointmentList}
+                      editMode="row"
+                      disableColumnFilter
+                      disableColumnSelector
+                      disableDensitySelector
+                      columns={appointmentColumns}
+                      slots={{ toolbar: GridToolbar }}
+                      slotProps={{
+                        toolbar: {
+                          showQuickFilter: true,
                         },
                       }}
-                      pageSizeOptions={[5]}
-                      // checkboxSelection
-                      // disableRowSelectionOnClick
+                      onRowSelectionModelChange={(newRowSelectionModel) => {
+                        setRowSelectionModel(newRowSelectionModel);
+                      }}
                     />
+                    <div>
+                      {rowSelectionModel}
+                    </div>
                     <Box sx={{ p: 2 }}>
-                      <Button href="/appointment" variant="contained">
+                      <Link to="/appointment" style={{ textDecoration: "none" }}>
+                      <Button variant="contained">
                         Add
                       </Button>
-                      <Button href="/appointment" variant="contained">
+                      </Link>
+                      <Link to={`/appointment/${rowSelectionModel}`} style={{ textDecoration: "none" }}>
+                      <Button variant="contained">
                         Edit
                       </Button>
+                      </Link>
                       <Button variant="contained">Delete</Button>
                     </Box>
                   </Box>
@@ -230,8 +321,8 @@ const HomePage = () => {
                   <Title>Availability</Title>
                   <Box sx={{ height: 300, width: "100%" }}>
                     <DataGrid
-                      rows={rows2}
-                      columns={columns2}
+                      rows={availabilityList}
+                      columns={columns3}
                       initialState={{
                         pagination: {
                           paginationModel: {

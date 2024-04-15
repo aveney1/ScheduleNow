@@ -18,12 +18,14 @@ function TimePickerEx() {
 
   return (
     <Grid container direction="column" alignItems="center">
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DatePicker
         label="Select Time"
         value={selectedTime}
         onChange={handleTimeChange}
         renderInput={(params) => <TextField {...params} />}
       />
+      </LocalizationProvider>
       <Button variant="contained" color="primary" onClick={handleSubmit}>Submit</Button>
     </Grid>
   );
