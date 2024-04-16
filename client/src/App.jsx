@@ -1,4 +1,3 @@
-// import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/LoginPage'
 import RegistrationPage from './pages/RegistrationPage'
@@ -8,7 +7,7 @@ import CustomerPage from './pages/CustomerPage'
 import AppointmentPage from './pages/AppointmentPage'
 import AvailabilityPage from './pages/AvailabilityPage'
 import PasswordPage from "./pages/PasswordPage.jsx";
-
+//import "./App.css";
 //import "./style.css"
 
 function App() {

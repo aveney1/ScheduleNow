@@ -95,7 +95,6 @@ const HomePage = () => {
     },
   ];
 
-
   const localHost = "http://localhost:8800";
 
   //Get availability for all employees
@@ -127,7 +126,6 @@ const HomePage = () => {
     };
     fetchAppointmentList();
   }, []);
-
 
   const [rowSelectionModel, setRowSelectionModel] = useState([]);
   return (
@@ -202,32 +200,30 @@ const HomePage = () => {
                       //   id: false,
                       // }}
                     />
-                    <div>
-                      {rowSelectionModel}
-                    </div>
+                    <div>{rowSelectionModel}</div>
                     <Box sx={{ p: 2 }}>
-                      <Link to="/appointment" style={{ textDecoration: "none" }}>
-                      <Button variant="contained">
-                        Add
-                      </Button>
+                      <Link
+                        to="/appointment"
+                        style={{ textDecoration: "none" }}
+                      >
+                        <Button variant="contained">Add</Button>
                       </Link>
-                      <Link to={`/appointment/${rowSelectionModel}`} style={{ textDecoration: "none" }}>
-                      <Button variant="contained">
-                        Edit
-                      </Button>
+                      <Link
+                        to={`/appointment/${rowSelectionModel}`}
+                        style={{ textDecoration: "none" }}
+                      >
+                        <Button variant="contained">Edit</Button>
                       </Link>
                       <Button variant="contained">Delete</Button>
                       <Link to="/customer" style={{ textDecoration: "none" }}>
-                      <Button variant="contained">
-                        Add Customer
-                      </Button>
+                        <Button variant="contained">Add Customer</Button>
                       </Link>
                     </Box>
                   </Box>
                 </Paper>
               </Grid>
               {/***************************  Availability List ************************** */}
-              
+
               <Grid item xs={12} md={5} lg={4}>
                 <Paper
                   sx={{
@@ -261,7 +257,6 @@ const HomePage = () => {
                       disableDensitySelector
                       // checkboxSelection
                       // disableRowSelectionOnClick
-                      
                     />
 
                     <Box sx={{ p: 1 }}>
@@ -276,7 +271,7 @@ const HomePage = () => {
                   </Box>
                 </Paper>
               </Grid>
-              
+
               {/*************************** Graph #1  ************************** */}
               <Grid item xs={12} md={6} lg={6}>
                 <Paper

@@ -49,7 +49,7 @@ const AvailabilityPage = () => {
     }
     const date1 = new Date(`2000-01-01T${avail.startTime}`);
     const date2 = new Date(`2000-01-01T${avail.endTime}`);
-  
+
     // Compare getTime() values
     if (date1.getTime() > date2.getTime()) {
       errors.startTime = "Start Time must be before End Time";
@@ -72,11 +72,7 @@ const AvailabilityPage = () => {
     console.log(avail);
     console.log("In submit: =>");
     var errorList = await validateForm(avail);
-    // const errors = validateForm(avail);
-    // console.log(errors)
 
-    //Object.keys(errors).length === 0
-    //console.log(errors)
     if (!Object.keys(errorList).length) {
       try {
         console.log("No Errors, Attempting post....");
@@ -101,7 +97,6 @@ const AvailabilityPage = () => {
 
   const handleChange = (id, e) => {
     console.log("handleChange triggered =>");
-    //console.log("id: " + id + " e: " + e)
     console.log(avail);
     setAvail((prev) => ({ ...prev, [id]: e }));
     console.log("after=>");
@@ -114,7 +109,6 @@ const AvailabilityPage = () => {
         try {
           const res = await axios.get(localHost + "/availability/" + id);
           console.log("useEffect triggered");
-          //console.log(res.data[0].day)
           setAvail(res.data[0]);
         } catch (err) {
           console.log("Error retrieving availability details: " + err);
@@ -129,20 +123,18 @@ const AvailabilityPage = () => {
       <Grid container justifyContent="center" alignItems="center" sx={{ p: 3 }}>
         <Paper elevation={3} sx={{ p: 3 }} style={{ width: "550px" }}>
           <Box display="flex" flexDirection="column" alignItems="center">
-          <Typography variant="h3" color="primary" gutterBottom>
+            <Typography variant="h3" color="primary" gutterBottom>
               Availability
             </Typography>
-          <div>
-      {result.length > 0 && (
-        <ul>
-          {result.map((error, index) => (
-            
-            <li key={index}>{error}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-            
+            <div>
+              {result.length > 0 && (
+                <ul>
+                  {result.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </Box>
           <Grid item flexDirection="row" sm={12} md={12} lg={12}>
             <Title>Day</Title>
@@ -153,8 +145,6 @@ const AvailabilityPage = () => {
               value={avail.day}
               style={{ minWidth: 120 }}
               onChange={(event) => {
-                // console.log("day change: ")
-                // console.log(event)
                 handleChange("day", event.target.value);
               }}
             >
