@@ -17,16 +17,28 @@ import {Select, MenuItem} from "@mui/material/"
 
 const AppointmentPage = () => {
   const localHost = "http://localhost:8800";
+  const tomorrow = dayjs().add(1, 'day');
+  //create context to get current employee signed in
+  const placeholderID = "2";
 
-  const { id } = useParams();
+  // const { id } = useParams();
+  var { id } = useParams();
+  id = Object(id).length? id :0
+
+  // const id1 = Object(id).length? id :0
+
+  // console.log(Object(id).length? 50 :'something else')
+  //console.log("Param:" + id)
+  //console.log("id: " + id1)
+
+  const [formErrors, setFormErrors] = useState([])
   const [appt, setAppt] = useState({
-    id: "",
-    date: "",
-    startTime: "",
-    endTime: "",
+    date: tomorrow,
+    startTime: "08:00:00",
+    endTime: "09:00:00",
     customerId: "",
-    employeeId: "",
-    status: "",
+    employeeId: placeholderID,
+    status: "scheduled",
   });
   const [customers, setCustomers] = useState([]);
   const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
@@ -74,14 +86,27 @@ const AppointmentPage = () => {
   useEffect(() => {
     const fetchApptDetails = async () => {
       try {
-        const res1 = await axios.get(localHost + "/appointments/" + id);
-        const apptCustomerId = res1.data[0].customerId;
+        // const res1 = await axios.get(localHost + "/appointments/" + id);
+        // const apptCustomerId = res1.data[0].customerId;
+        // const res2 = await axios.get(localHost + "/customers/");
+        // console.log("useEffect triggered");
+
+        // setAppt(res1.data[0]);
+        // setCustomers(res2.data);
+        // setRowSelectionModel(apptCustomerId);
+        
+        if(id){
+          const res1 = await axios.get(localHost + "/appointments/" + id);
+          const apptCustomerId = res1.data[0].customerId;
+          setRowSelectionModel(apptCustomerId);
+          setAppt(res1.data[0]);
+        }
+        
         const res2 = await axios.get(localHost + "/customers/");
         console.log("useEffect triggered");
-
-        setAppt(res1.data[0]);
         setCustomers(res2.data);
-        setRowSelectionModel(apptCustomerId);
+        
+        
       } catch (err) {
         console.log("Error retrieving appointment details: " + err);
       }
@@ -100,35 +125,75 @@ const AppointmentPage = () => {
   };
 
   const handleSubmit = async (e) => {
+    
       e.preventDefault()
-      appt.date = appt.date.substring(0,10)
+      //console.log(appt.date)
+      //appt.date = (appt.date).substring(0,10)
       console.log("In submit: ")
-      console.log(appt.date)
+      //console.log(appt.date)
+      var errorList = await validateForm(appt)
+      //setFormErrors(validateForm(appt))
+    //console.log(formErrors)
+    
+    //   e.preventDefault()
+      // appt.date = appt.date.substring(0,10)
+    //   console.log("In submit: ")
+    //   console.log(appt.date)
+    //   setFormErrors(validateForm(appt))
+    // console.log(formErrors)
       
      //const errors = validateForm(appt)
       //Object.keys(errors).length === 0
       //console.log(errors)
-      // return
+    
+      if(!(Object.keys(errorList).length)){
       try{
-        const res = await axios.put(localHost+"/appointments/"+id, appt)
+        console.log("No Errors, Attempting post....")
+        var res = ''
+        console.log(appt)
+        if(id){
+          console.log("/appointments/id")
+          res = await axios.put(localHost+"/appointments/"+id, appt)
+        }else{
+          console.log("/appointments")
+          console.log(appt)
+          res = await axios.post(localHost+"/appointments/", appt)
+        }
+        
         console.log("res")
         console.log(res)
-        //navigate("/home")
+        navigate("/home")
       }catch(err){
         console.log(err)
       }
+    }
   }
 
 
-  const validateForm = (appt) => {
+  const validateForm = async (appt) => {
     const errors = {};
 
     if (!appt.date){
       errors.date = "Date is required"
     }
+    if(dayjs(appt.date) < dayjs()){
+      errors.date = "Date cannot be in the past"
+    }
     if(!appt.startTime){
       errors.startTime = "Start Time is required"
     }
+  const date1 = new Date(`2000-01-01T${appt.startTime}`);
+  const date2 = new Date(`2000-01-01T${appt.endTime}`);
+
+  // Compare getTime() values
+  if (date1.getTime() > date2.getTime()) {
+    errors.startTime = "Start Time must be before End Time";
+  } else if (date1.getTime() < date2.getTime()) {
+    //valid
+  } else {
+    errors.startTime = "Start Time cannot be the same as End Time";
+  }
+
     if(!appt.endTime){
       errors.endTime = "End Time is required"
     }
@@ -147,28 +212,16 @@ const AppointmentPage = () => {
     if(appt.endTime === "Invalid Date"){
       errors.endTime = "Invalid End Time"
     }
+    if(!appt.status){
+      errors.status = "Status is required"
+    }
 
-    // Check if username is empty
-    // if (
-    //   appt.date && 
-    //   appt.customerId && 
-    //   appt.employeeId && 
-    //   appt.startTime &&
-    //   appt.endTime) {
-    //   errors.username = "Username is required";
-    // }
-
-    // Check if password is empty
-    // if (!formData.password) {
-    //   errors.password = "Password is required";
-    // }
-
-    // setFormData((prevState) => ({ ...prevState, errors }));
-
-    // Return true if there are no errors
-    // return Object.keys(errors).length === 0;
+    setFormErrors(errors)
     return errors
+
   };
+  var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
+ 
   return (
     <>
       <form id="form" onSubmit={(e)=>{
@@ -196,8 +249,18 @@ const AppointmentPage = () => {
                 alignItems="center"
                 sx={{ p: 3 }}
               >
+                <div>
+      {result.length > 0 && (
+        <ul>
+          {result.map((error, index) => (
+            
+            <li key={index}>{error}</li>
+          ))}
+        </ul>
+      )}
+    </div>
                 <Title>Customer</Title>
-                <Box display="flex" flexDirection="column" alignItems="center">
+                <Box display="flex" flexDirection="column">
                   <Box sx={{ height: 350, width: "100%" }}>
                     <DataGrid
                     name=""
@@ -267,6 +330,8 @@ const AppointmentPage = () => {
                       variant="outlined"
                       //format="YYYY-MM-DD"
                       onChange={(event) => {
+                        console.log("date on change")
+                        console.log(dayjs(event).format("YYYY-MM-DD"))
                         handleChange("date", dayjs(event).format("YYYY-MM-DD"));
                       }}
 

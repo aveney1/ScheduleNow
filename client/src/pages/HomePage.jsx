@@ -15,7 +15,6 @@ import Title from "../components/Title";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
-// import Tester from "../components/Tester";
 
 const HomePage = () => {
   const NavBar = styled(MuiAppBar, {
@@ -27,6 +26,8 @@ const HomePage = () => {
       duration: theme.transitions.duration.leavingScreen,
     }),
   }));
+
+  const defaultTheme = createTheme();
 
   const appointmentColumns = [
     { field: "id", headerName: "ID", width: 45 },
@@ -72,91 +73,7 @@ const HomePage = () => {
     },
   ];
 
-  const rows = [
-    {
-      id: 1,
-      Date: "01-01-2025",
-      startTime: "08:00:00",
-      endTime: "08:00:00",
-      Customer: "John Doe",
-      Employee: "Emp1",
-    },
-    {
-      id: 2,
-      Date: "01-01-2025",
-      startTime: "08:00:00",
-      endTime: "08:00:00",
-      Customer: "John Doe",
-      Employee: "Emp1",
-    },
-    {
-      id: 3,
-      Date: "01-01-2025",
-      startTime: "08:00:00",
-      endTime: "08:00:00",
-      Customer: "John Doe",
-      Employee: "Emp1",
-    },
-    {
-      id: 4,
-      Date: "01-01-2025",
-      startTime: "08:00:00",
-      endTime: "08:00:00",
-      Customer: "John Doe",
-      Employee: "Emp1",
-    },
-    {
-      id: 5,
-      Date: "01-01-2025",
-      startTime: "08:00:00",
-      endTime: "08:00:00",
-      Customer: "John Doe",
-      Employee: "Emp1",
-    },
-  ];
-
-  //availability table
-  const columns2 = [
-    { field: "id", headerName: "ID", width: 1 },
-    {
-      field: "Day",
-      headerName: "Day",
-      width: 100,
-      editable: true,
-    },
-    {
-      field: "start",
-      headerName: "Start Time",
-      width: 100,
-      editable: true,
-    },
-    {
-      field: "end",
-      headerName: "End Time",
-      width: 100,
-      editable: true,
-    },
-  ];
-
-  const rows2 = [
-    { id: 1, Day: "Monday", start: "08:00:00", end: "08:00:00" },
-    { id: 2, Day: "Tuesday", start: "08:00:00", end: "08:00:00" },
-    { id: 3, Day: "Wednesday", start: "08:00:00", end: "08:00:00" },
-    { id: 4, Day: "Thursday", start: "08:00:00", end: "08:00:00" },
-    { id: 5, Day: "Friday", start: "08:00:00", end: "08:00:00" },
-    { id: 6, Day: "Saturday", start: "08:00:00", end: "08:00:00" },
-    { id: 7, Day: "Sunday", start: "08:00:00", end: "08:00:00" },
-  ];
-  const rows3 = [
-    { id: 1, Day: "Monday", start: "08:00:00", end: "08:00:00" },
-    { id: 2, Day: "Tuesday", start: "08:00:00", end: "08:00:00" },
-    { id: 3, Day: "Wednesday", start: "08:00:00", end: "08:00:00" },
-    { id: 4, Day: "Thursday", start: "08:00:00", end: "08:00:00" },
-    { id: 5, Day: "Friday", start: "08:00:00", end: "08:00:00" },
-    { id: 6, Day: "Saturday", start: "08:00:00", end: "08:00:00" },
-    { id: 7, Day: "Sunday", start: "08:00:00", end: "08:00:00" },
-  ];
-  const columns3 = [
+  const availabilityColumns = [
     { field: "id", headerName: "ID", width: 1 },
     {
       field: "day",
@@ -176,15 +93,8 @@ const HomePage = () => {
       width: 100,
       editable: true,
     },
-    {
-      field: "employeeId",
-      headerName: "Employee ID",
-      width: 100,
-      editable: true,
-    },
   ];
 
-  const defaultTheme = createTheme();
 
   const localHost = "http://localhost:8800";
 
@@ -288,6 +198,9 @@ const HomePage = () => {
                       onRowSelectionModelChange={(newRowSelectionModel) => {
                         setRowSelectionModel(newRowSelectionModel);
                       }}
+                      // columnVisibilityModel={{
+                      //   id: false,
+                      // }}
                     />
                     <div>
                       {rowSelectionModel}
@@ -304,11 +217,17 @@ const HomePage = () => {
                       </Button>
                       </Link>
                       <Button variant="contained">Delete</Button>
+                      <Link to="/customer" style={{ textDecoration: "none" }}>
+                      <Button variant="contained">
+                        Add Customer
+                      </Button>
+                      </Link>
                     </Box>
                   </Box>
                 </Paper>
               </Grid>
               {/***************************  Availability List ************************** */}
+              
               <Grid item xs={12} md={5} lg={4}>
                 <Paper
                   sx={{
@@ -322,17 +241,27 @@ const HomePage = () => {
                   <Box sx={{ height: 300, width: "100%" }}>
                     <DataGrid
                       rows={availabilityList}
-                      columns={columns3}
+                      columns={availabilityColumns}
                       initialState={{
                         pagination: {
                           paginationModel: {
-                            pageSize: 7,
+                            pageSize: 5,
                           },
                         },
                       }}
-                      pageSizeOptions={[7]}
+                      pageSizeOptions={[5]}
+                      slots={{ toolbar: GridToolbar }}
+                      slotProps={{
+                        toolbar: {
+                          showQuickFilter: true,
+                        },
+                      }}
+                      disableColumnFilter
+                      disableColumnSelector
+                      disableDensitySelector
                       // checkboxSelection
                       // disableRowSelectionOnClick
+                      
                     />
 
                     <Box sx={{ p: 1 }}>
@@ -347,6 +276,7 @@ const HomePage = () => {
                   </Box>
                 </Paper>
               </Grid>
+              
               {/*************************** Graph #1  ************************** */}
               <Grid item xs={12} md={6} lg={6}>
                 <Paper
