@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useMemo, useContext, useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Title from "../components/Title";
@@ -14,28 +14,32 @@ import { TimeField } from "@mui/x-date-pickers/TimeField";
 import { DateField } from "@mui/x-date-pickers/DateField";
 import { FormControl } from "@mui/base/FormControl";
 import { Select, MenuItem } from "@mui/material/";
+import { useUserContext } from "../context/UserContext";
 
 const AppointmentPage = () => {
+
   const localHost = "http://localhost:8800";
-  const tomorrow = dayjs().add(1, "day");
-  //create context to get current employee signed in
-
+  const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
   const placeholderID = "2";
-
   var { id } = useParams();
-  id = Object(id).length ? id : 0;
+  id = Object(id).length ? id : null;
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'))
 
   const [formErrors, setFormErrors] = useState([]);
+
   const [appt, setAppt] = useState({
-    date: tomorrow,
-    startTime: "08:00:00",
-    endTime: "09:00:00",
+    date: "",
+    startTime: "",
+    endTime: "",
     customerId: "",
-    employeeId: placeholderID,
-    status: "scheduled",
+    employeeId: !(currentUser.isManager)?currentUser.employeeId:null,
+    status: "",
   });
+
   const [customers, setCustomers] = useState([]);
   const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
+
   const columns = [
     { field: "id", headerName: "ID", width: 45 },
     {
@@ -75,20 +79,19 @@ const AppointmentPage = () => {
   });
 
   const navigate = useNavigate();
-  // Gets appointment details from DB
+
+  
 
   useEffect(() => {
     const fetchApptDetails = async () => {
       try {
         if (id) {
           const res1 = await axios.get(localHost + "/appointments/" + id);
-          const apptCustomerId = res1.data[0].customerId;
-          setRowSelectionModel(apptCustomerId);
+          setRowSelectionModel(res1.data[0].customerId);
           setAppt(res1.data[0]);
+   
         }
-
         const res2 = await axios.get(localHost + "/customers/");
-        console.log("useEffect triggered");
         setCustomers(res2.data);
       } catch (err) {
         console.log("Error retrieving appointment details: " + err);
@@ -97,10 +100,9 @@ const AppointmentPage = () => {
     fetchApptDetails();
   }, []);
 
+
   const handleChange = (id, e) => {
     setAppt((prev) => ({ ...prev, [id]: e }));
-    console.log("After set: ");
-    console.log(appt);
   };
 
   const handleSubmit = async (e) => {
@@ -110,20 +112,12 @@ const AppointmentPage = () => {
 
     if (!Object.keys(errorList).length) {
       try {
-        console.log("No Errors, Attempting post....");
         var res = "";
-        console.log(appt);
         if (id) {
-          console.log("/appointments/id");
           res = await axios.put(localHost + "/appointments/" + id, appt);
         } else {
-          console.log("/appointments");
-          console.log(appt);
           res = await axios.post(localHost + "/appointments/", appt);
         }
-
-        console.log("res");
-        console.log(res);
         navigate("/home");
       } catch (err) {
         console.log(err);
@@ -137,9 +131,11 @@ const AppointmentPage = () => {
     if (!appt.date) {
       errors.date = "Date is required";
     }
-    if (dayjs(appt.date) < dayjs()) {
-      errors.date = "Date cannot be in the past";
-    }
+
+
+    // if ( && dayjs(appt.date) < dayjs()) {
+    //   errors.date = "Date cannot be in the past";
+    // }
     if (!appt.startTime) {
       errors.startTime = "Start Time is required";
     }
@@ -181,6 +177,7 @@ const AppointmentPage = () => {
     return errors;
   };
   var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
+  console.log("row selectionend: ",rowSelectionModel)
 
   return (
     <>
@@ -190,6 +187,7 @@ const AppointmentPage = () => {
           handleSubmit(e);
         }}
       >
+          
         <Grid container direction="column" alignItems="center" sx={{ p: 3 }}>
           <Paper elevation={3} sx={{ p: 3, minWidth: "60%" }}>
             <Box
@@ -201,6 +199,7 @@ const AppointmentPage = () => {
               <Typography variant="h3" color="primary" gutterBottom>
                 Appointment
               </Typography>
+              {/* <div></div> */}
             </Box>
             <Grid container direction="row" alignItems="center" sx={{ p: 2 }}>
               <Grid
@@ -281,10 +280,9 @@ const AppointmentPage = () => {
                       id="date"
                       name="date"
                       variant="outlined"
-                      //format="YYYY-MM-DD"
+                      format="YYYY-MM-DD"
                       onChange={(event) => {
-                        console.log("date on change");
-                        console.log(dayjs(event).format("YYYY-MM-DD"));
+                        // console.log(dayjs(event).format("YYYY-MM-DD"));
                         handleChange("date", dayjs(event).format("YYYY-MM-DD"));
                       }}
                       value={dayjs(appt.date)}
@@ -341,6 +339,7 @@ const AppointmentPage = () => {
             </Box>
           </Paper>
         </Grid>
+        
       </form>
     </>
   );

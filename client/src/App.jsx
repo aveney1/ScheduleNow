@@ -1,3 +1,4 @@
+import React ,{useContext, createContext,useMemo, useState} from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/LoginPage'
 import RegistrationPage from './pages/RegistrationPage'
@@ -7,13 +8,14 @@ import CustomerPage from './pages/CustomerPage'
 import AppointmentPage from './pages/AppointmentPage'
 import AvailabilityPage from './pages/AvailabilityPage'
 import PasswordPage from "./pages/PasswordPage.jsx";
-//import "./App.css";
-//import "./style.css"
+import { UserProvider} from './context/UserContext.jsx';
+import { useUserContext } from './context/UserContext.jsx';
+
+
 
 function App() {
   return (
-    <>
-      <div className="App">
+    <UserProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LoginPage />} />
@@ -29,8 +31,7 @@ function App() {
             <Route path="/password" element={<PasswordPage />} />
           </Routes>
         </BrowserRouter>
-      </div>
-    </>
+        </UserProvider>
   );
 }
 

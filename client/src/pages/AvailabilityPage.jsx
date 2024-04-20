@@ -16,7 +16,8 @@ const AvailabilityPage = () => {
   const localHost = "http://localhost:8800";
   var { id } = useParams();
   id = Object(id).length ? id : 0;
-  const placeholderID = "2";
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const navigate = useNavigate()
   const days = [
     "Monday",
     "Tuesday",
@@ -27,25 +28,22 @@ const AvailabilityPage = () => {
     "Sunday",
   ];
   const [formErrors, setFormErrors] = useState([]);
-  const [avail, setAvail] = useState({
-    day: "",
-    startTime: "00:00:00",
-    endTime: "00:00:00",
-    employeeId: placeholderID,
-  });
+  
+  
+  const [avail, setAvail] = useState({ day: "", employeeId: currentUser.employeeId});
 
   const validateForm = async (avail) => {
     const errors = {};
-    console.log("in validate form");
-    console.log(avail);
-    if (!avail.day) {
+
+    if (!avail.day || avail.day === "") {
       errors.day = "Day is required";
     }
-    if (avail.day === "") {
-      errors.day = "Day is required";
-    }
+    
     if (!avail.startTime) {
       errors.startTime = "Start Time is required";
+    }
+    if (!avail.endTime) {
+      errors.endTime = "End Time is required";
     }
     const date1 = new Date(`2000-01-01T${avail.startTime}`);
     const date2 = new Date(`2000-01-01T${avail.endTime}`);
@@ -58,37 +56,29 @@ const AvailabilityPage = () => {
     } else {
       errors.startTime = "Start Time cannot be the same as End Time";
     }
-    if (!avail.endTime) {
-      errors.endTime = "End Time is required";
-    }
-    console.log(errors);
+    
     setFormErrors(errors);
     return errors;
   };
+
   var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(avail);
-    console.log("In submit: =>");
     var errorList = await validateForm(avail);
 
     if (!Object.keys(errorList).length) {
       try {
-        console.log("No Errors, Attempting post....");
-        console.log(avail);
+        console.log("Avail in handleSubmit: ",avail);
         var res = "";
         if (id) {
-          console.log("/availability/id");
           res = await axios.put(localHost + "/availability/" + id, avail);
         } else {
-          console.log("/availability");
-          console.log(avail);
           res = await axios.post(localHost + "/availability/", avail);
         }
-        console.log("res");
-        console.log(res);
-        //navigate("/home")
+        // console.log("res");
+        // console.log(res);
+        navigate("/home")
       } catch (err) {
         console.log(err);
       }
@@ -96,11 +86,7 @@ const AvailabilityPage = () => {
   };
 
   const handleChange = (id, e) => {
-    console.log("handleChange triggered =>");
-    console.log(avail);
     setAvail((prev) => ({ ...prev, [id]: e }));
-    console.log("after=>");
-    console.log(avail);
   };
 
   useEffect(() => {
@@ -108,7 +94,6 @@ const AvailabilityPage = () => {
       if (id) {
         try {
           const res = await axios.get(localHost + "/availability/" + id);
-          console.log("useEffect triggered");
           setAvail(res.data[0]);
         } catch (err) {
           console.log("Error retrieving availability details: " + err);
@@ -120,6 +105,12 @@ const AvailabilityPage = () => {
 
   return (
     <>
+    <form
+    id="form"
+    onSubmit={(e) => {
+      handleSubmit(e);
+    }}
+    >
       <Grid container justifyContent="center" alignItems="center" sx={{ p: 3 }}>
         <Paper elevation={3} sx={{ p: 3 }} style={{ width: "550px" }}>
           <Box display="flex" flexDirection="column" alignItems="center">
@@ -138,7 +129,6 @@ const AvailabilityPage = () => {
           </Box>
           <Grid item flexDirection="row" sm={12} md={12} lg={12}>
             <Title>Day</Title>
-            {/* Days */}
             <Select
               name="day"
               id="day"
@@ -196,7 +186,7 @@ const AvailabilityPage = () => {
             width="100%"
           >
             <Stack direction="row" spacing={2} alignItems="center">
-              <Link to="/home" style={{ textDecoration: "none" }}>
+              {/* <Link to="/home" style={{ textDecoration: "none" }}>
                 <Button
                   onClick={handleSubmit}
                   type="submit"
@@ -204,7 +194,11 @@ const AvailabilityPage = () => {
                 >
                   Submit
                 </Button>
-              </Link>
+                
+              </Link> */}
+              <Button type="submit" variant="contained" id="submitButton">
+                  Submit
+                </Button>
               <Link to="/home" style={{ textDecoration: "none" }}>
                 <Button variant="contained">Cancel</Button>
               </Link>
@@ -212,6 +206,7 @@ const AvailabilityPage = () => {
           </Box>
         </Paper>
       </Grid>
+      </form>
     </>
   );
 };

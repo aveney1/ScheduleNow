@@ -1,70 +1,109 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { Button, TextField } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useUserContext } from "../context/UserContext";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const localHost = "http://localhost:8800";
-  const [acctUsernames, setAcctUsernames] = useState([]);
+
   const [formErrors, setFormErrors] = useState([]);
   const [cred, setCred] = useState({
     username: "",
     password: "",
   });
 
+  const { user, setUser } = useUserContext();
+
   const handleChange = (id, e) => {
-    // Handle form submission
-    console.log("handleChange triggered =>");
-    console.log(cred);
+    console.log("< = handleChange triggered = >");
     setCred((prev) => ({ ...prev, [id]: e }));
-    console.log("after=>");
-    console.log(cred);
   };
 
   const handleClick = (e) => {
-    console.log("create account clicked");
+    console.log("< = handleClick triggered = >");
     navigate("/registration");
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submit has been clicked in login");
-    console.log(cred);
+    console.log("< = handleSubmit triggered = >");
+    // console.log("Login - Submitted credentials =>: ", cred);
+
     var errorList = await validateForm(cred);
+
+    // console.log("Login - errorList: ", errorList);
+
     if (!Object.keys(errorList).length) {
       var res = "";
+      var res1 = "";
       try {
-        console.log("No Errors, Attempting get....");
-        console.log("cred =>: ");
-        console.log(cred);
         res = await axios.get(
           localHost + "/login/" + cred.username + "/" + cred.password
         );
-        console.log("res");
-        console.log(res);
-        console.log(res.data);
+
+        // console.log("Login - Account response: ", res, res.data);
+        
         if (res.data.length === 0) {
+          // No matching account
           setFormErrors({ invalid: "Invalid credentials" });
-          console.log("No matching accounts");
-        } else {
-          console.log("successful authentication");
+
+        } else if (res.data.length === 1 && res.status === 200 && res.data[0].isActive) {
+          // Active account found
+          console.log("Active account found")
+
+        } else if (res.data[0].isActive != null && !(res.data[0].isActive)){
+          // Inactive account
+          setFormErrors({ inactive: "Account is inactive" });
         }
       } catch (err) {
-        setFormErrors({ invalid: "Invalid credentials" });
-        console.log(err);
+        console.log("Login - Account Server Error: ", err);
       }
+    }
+
+    if(!Object.keys(errorList).length && res.data.length === 1 && res.status === 200){
+      try{
+        res1 = await axios.get(
+          localHost + "/employees/" + res.data[0].id
+        );
+        // console.log("Login - Employee response: ", res1, res1.data);
+        if (res1.data.length === 1 && res.status === 200 && res.data[0]) {
+          console.log("Employee found")
+
+          localStorage.setItem('currentUser', JSON.stringify({
+            employeeId: res1.data[0].id,
+            firstName: res1.data[0].firstName,
+            lastName: res1.data[0].lastName,
+            email: res1.data[0].email,
+            isManager: res1.data[0].isManager,
+            accountId: res1.data[0].accountId,
+            username: res.data[0].username,
+            password: res.data[0].password,
+            isActive: res.data[0].isActive,
+          }
+          ))
+         
+          navigate("/home");
+
+        }
+      }catch(err){
+        console.log("Login - Employee Server Error: ", err);
+      }  
+
     }
   };
 
+
   const validateForm = async (cred) => {
+    console.log("< = Validating Form = >");
     const errors = {};
 
-    console.log("in validate");
     if (!cred.username) {
       errors.username = "Username is required";
     }
@@ -75,6 +114,7 @@ const LoginPage = () => {
     setFormErrors(errors);
     return errors;
   };
+
   var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
 
   return (

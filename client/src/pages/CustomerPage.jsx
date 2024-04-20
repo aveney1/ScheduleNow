@@ -190,7 +190,6 @@ const CustomerPage = () => {
                   </ul>
                 )}
               </div>
-
               <Title>First Name</Title>
               <TextField
                 id="firstName"

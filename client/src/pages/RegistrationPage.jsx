@@ -245,7 +245,6 @@ const RegistrationPage = () => {
                   </RadioGroup>
                 </FormControl>
               </Box>
-              {/* </Box> */}
               <Box mt={2} display="flex" justifyContent="center" width="100%">
                 <Stack direction="row" spacing={2} alignItems="center">
                   <Button type="submit" variant="contained">

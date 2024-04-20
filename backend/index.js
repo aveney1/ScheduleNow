@@ -29,7 +29,6 @@ app.get("/login/:username/:password", (req, res) => {
   // ];
   // const username = req.params.username;
   // const password = req.params.password;
-  console.log(req.route.path);
   const credentials = [req.params.username, req.params.password];
 
   const q = "SELECT * FROM Account WHERE (username = ? AND password = ?)";
@@ -108,7 +107,7 @@ app.get("/employees/:id/appointments", (req, res) => {
 
 // Employees - Get employee availability
 app.get("/employees/:id/availability", (req, res) => {
-  const q = "SELECT * FROM Availbility WHERE employeeId = ?";
+  const q = "SELECT * FROM Availability WHERE employeeId = ?";
   const employeeId = req.params.id;
 
   db.query(q, [employeeId], (err, data) => {
@@ -147,6 +146,34 @@ app.post("/employees/:accountId", (req, res) => {
   });
 });
 
+
+// Employees - Get employee
+app.get("/employees/:accountId", (req, res) => {
+  const accountId = req.params.accountId;
+  const q =
+    "SELECT * FROM Employee WHERE accountId = ?";
+
+  db.query(q, accountId, (err, data) => {
+    if (err) return res.json(err);
+    return res.json(data);
+  });
+});
+
+// Employees - Get employee names
+app.get("/employees/names/:ids", (req, res) => {
+  var employeeIds = req.params.ids;
+  console.log("params: ",employeeIds)
+  const q =
+    "SELECT id, firstName, lastName FROM Employee WHERE id IN ("+employeeIds+")"
+    db.query(q, (err, data) => {
+      if (err) return res.json(err);
+      return res.json(data);
+    });
+  
+  
+
+});
+
 // Appointments - Get all appointments
 app.get("/appointments", (req, res) => {
   const q = "SELECT * FROM Appointment";
@@ -175,6 +202,17 @@ app.post("/appointments", (req, res) => {
     return res.json("Appointment has been created successfully");
   });
 });
+
+app.delete("/appointments/:id", (req, res) => {
+  const q = "DELETE FROM Appointment WHERE id = ?"
+  const appointmentId = req.params.id;
+
+  db.query(q, [appointmentId], (err, data) => {
+    if (err) return res.json(err);
+    return res.json("Appointment has been deleted successfully");
+  });
+});
+
 
 // Appointments - Get appointment
 app.get("/appointments/:id", (req, res) => {
@@ -205,6 +243,16 @@ app.put("/appointments/:id", (req, res) => {
   db.query(q, [...values, appointmentId], (err, data) => {
     if (err) return res.json(err);
     return res.json("Appointment has been updated successfully");
+  });
+});
+
+app.delete("/availability/:id", (req, res) => {
+  const q = "DELETE FROM Availability WHERE id = ?"
+  const availId = req.params.id;
+
+  db.query(q, [availId], (err, data) => {
+    if (err) return res.json(err);
+    return res.json("Availability has been deleted successfully");
   });
 });
 
