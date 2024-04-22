@@ -22,22 +22,11 @@ app.get("/", (req, res) => {
 
 // Login - Authenticate user
 app.get("/login/:username/:password", (req, res) => {
-  // const q = "SELECT * FROM Account WHERE username = ? and password = ?"
-  // const credentials = [
-  //     req.body.username,
-  //     req.body.password
-  // ];
-  // const username = req.params.username;
-  // const password = req.params.password;
   const credentials = [req.params.username, req.params.password];
 
   const q = "SELECT * FROM Account WHERE (username = ? AND password = ?)";
-  //Get availibility and appointment lists
   db.query(q, [credentials[0], credentials[1]], (err, data) => {
-    // db.query(q, (err,data)=>{
-
     if (err) return res.json(err);
-
     return res.json(data);
   });
 });
@@ -53,7 +42,6 @@ app.post("/registration", (req, res) => {
     req.body.isActive,
   ];
 
-  console.log("in registration endpoint");
   db.query(accountQ, [accountValues], (err, data) => {
     if (err) return res.json(err);
     return res.json(data);
@@ -78,6 +66,18 @@ app.get("/accounts/:username", (req, res) => {
   db.query(q, [username], (err, data) => {
     if (err) return res.json(err);
     return res.json(data[0].id);
+  });
+});
+
+// Accounts - change active status
+app.put("/accounts/:id/:newstatus", (req, res) => {
+  const id = req.params.id
+  const newStatus = req.params.newstatus
+  const q = "UPDATE Account SET isActive = "+newStatus+" WHERE id = "+id;
+
+  db.query(q, (err, data) => {
+    if (err) return res.json(err);
+    return res.json("Account modified successfully");
   });
 });
 
@@ -162,7 +162,6 @@ app.get("/employees/:accountId", (req, res) => {
 // Employees - Get employee names
 app.get("/employees/names/:ids", (req, res) => {
   var employeeIds = req.params.ids;
-  console.log("params: ",employeeIds)
   const q =
     "SELECT id, firstName, lastName FROM Employee WHERE id IN ("+employeeIds+")"
     db.query(q, (err, data) => {
@@ -196,13 +195,13 @@ app.post("/appointments", (req, res) => {
     req.body.employeeId,
     req.body.customerId,
   ];
-  console.log(values);
   db.query(q, [values], (err, data) => {
     if (err) return res.json(err);
     return res.json("Appointment has been created successfully");
   });
 });
 
+// Appointments - Delete appointment
 app.delete("/appointments/:id", (req, res) => {
   const q = "DELETE FROM Appointment WHERE id = ?"
   const appointmentId = req.params.id;
@@ -246,6 +245,7 @@ app.put("/appointments/:id", (req, res) => {
   });
 });
 
+// Availability - Delete availability
 app.delete("/availability/:id", (req, res) => {
   const q = "DELETE FROM Availability WHERE id = ?"
   const availId = req.params.id;
@@ -313,16 +313,6 @@ app.put("/availability/:id", (req, res) => {
   });
 });
 
-// Availability - Delete Availability
-app.delete("/availability/:id", (req, res) => {
-  const availId = req.params.id;
-  const q = "DELETE FROM Availability WHERE id = ?";
-
-  db.query(q, [availId], (err, data) => {
-    if (err) return res.json(err);
-    return res.json("Availability has been deleted successfully");
-  });
-});
 
 // Customer - Get customer
 app.get("/customers/:id", (req, res) => {

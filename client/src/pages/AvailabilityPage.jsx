@@ -18,17 +18,8 @@ const AvailabilityPage = () => {
   id = Object(id).length ? id : 0;
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const navigate = useNavigate()
-  const days = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-  const [formErrors, setFormErrors] = useState([]);
   
+  const [formErrors, setFormErrors] = useState([]);
   
   const [avail, setAvail] = useState({ day: "", employeeId: currentUser.employeeId});
 
@@ -69,15 +60,13 @@ const AvailabilityPage = () => {
 
     if (!Object.keys(errorList).length) {
       try {
-        console.log("Avail in handleSubmit: ",avail);
         var res = "";
         if (id) {
           res = await axios.put(localHost + "/availability/" + id, avail);
         } else {
           res = await axios.post(localHost + "/availability/", avail);
         }
-        // console.log("res");
-        // console.log(res);
+  
         navigate("/home")
       } catch (err) {
         console.log(err);
@@ -186,16 +175,6 @@ const AvailabilityPage = () => {
             width="100%"
           >
             <Stack direction="row" spacing={2} alignItems="center">
-              {/* <Link to="/home" style={{ textDecoration: "none" }}>
-                <Button
-                  onClick={handleSubmit}
-                  type="submit"
-                  variant="contained"
-                >
-                  Submit
-                </Button>
-                
-              </Link> */}
               <Button type="submit" variant="contained" id="submitButton">
                   Submit
                 </Button>

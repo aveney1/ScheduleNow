@@ -1,15 +1,13 @@
-import React ,{useContext, createContext,useMemo, useState} from 'react'
+import React from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/LoginPage'
 import RegistrationPage from './pages/RegistrationPage'
 import HomePage from './pages/HomePage'
-import ManagerHomePage from './pages/ManagerHomePage'
-import CustomerPage from './pages/CustomerPage'
 import AppointmentPage from './pages/AppointmentPage'
 import AvailabilityPage from './pages/AvailabilityPage'
-import PasswordPage from "./pages/PasswordPage.jsx";
+import NotFound404 from './pages/NotFound404.jsx';
 import { UserProvider} from './context/UserContext.jsx';
-import { useUserContext } from './context/UserContext.jsx';
+import RouteProtector from './utils/RouteProtector.jsx';
 
 
 
@@ -18,17 +16,15 @@ function App() {
     <UserProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/registration" element={<RegistrationPage />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/managerhome" element={<ManagerHomePage />} />
-            <Route path="/customer" element={<CustomerPage />} />
-            <Route path="/appointment" element={<AppointmentPage />} />
-            <Route path="/appointment/:id" element={<AppointmentPage />} />
-            <Route path="/availability" element={<AvailabilityPage />} />
-            <Route path="/availability/:id" element={<AvailabilityPage />} />
-            <Route path="/password" element={<PasswordPage />} />
+            <Route exact path="/" element={<LoginPage />} />
+            <Route exact path="/login" element={<LoginPage />} />
+            <Route exact path="/registration" element={<RegistrationPage />} />
+            <Route exact path="/home" element={<RouteProtector><HomePage /></RouteProtector>}/>
+            <Route exact path="/appointment" element={<RouteProtector><AppointmentPage /></RouteProtector>} />
+            <Route exact path="/appointment/:id" element={<RouteProtector><AppointmentPage /></RouteProtector>} />
+            <Route exact path="/availability" element={<RouteProtector><AvailabilityPage /></RouteProtector>} />
+            <Route exact path="/availability/:id" element={<RouteProtector><AvailabilityPage /></RouteProtector>} />
+            <Route exact path="*" element={<RouteProtector><NotFound404 /></RouteProtector>} />
           </Routes>
         </BrowserRouter>
         </UserProvider>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useMemo, useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Title from "../components/Title";
@@ -14,13 +14,10 @@ import { TimeField } from "@mui/x-date-pickers/TimeField";
 import { DateField } from "@mui/x-date-pickers/DateField";
 import { FormControl } from "@mui/base/FormControl";
 import { Select, MenuItem } from "@mui/material/";
-import { useUserContext } from "../context/UserContext";
 
 const AppointmentPage = () => {
 
   const localHost = "http://localhost:8800";
-  const tomorrow = dayjs().add(1, "day").format("YYYY-MM-DD");
-  const placeholderID = "2";
   var { id } = useParams();
   id = Object(id).length ? id : null;
 
@@ -107,7 +104,6 @@ const AppointmentPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("In submit: ");
     var errorList = await validateForm(appt);
 
     if (!Object.keys(errorList).length) {
@@ -131,11 +127,6 @@ const AppointmentPage = () => {
     if (!appt.date) {
       errors.date = "Date is required";
     }
-
-
-    // if ( && dayjs(appt.date) < dayjs()) {
-    //   errors.date = "Date cannot be in the past";
-    // }
     if (!appt.startTime) {
       errors.startTime = "Start Time is required";
     }
@@ -177,7 +168,6 @@ const AppointmentPage = () => {
     return errors;
   };
   var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
-  console.log("row selectionend: ",rowSelectionModel)
 
   return (
     <>
@@ -187,7 +177,6 @@ const AppointmentPage = () => {
           handleSubmit(e);
         }}
       >
-          
         <Grid container direction="column" alignItems="center" sx={{ p: 3 }}>
           <Paper elevation={3} sx={{ p: 3, minWidth: "60%" }}>
             <Box
@@ -199,7 +188,6 @@ const AppointmentPage = () => {
               <Typography variant="h3" color="primary" gutterBottom>
                 Appointment
               </Typography>
-              {/* <div></div> */}
             </Box>
             <Grid container direction="row" alignItems="center" sx={{ p: 2 }}>
               <Grid
@@ -282,7 +270,6 @@ const AppointmentPage = () => {
                       variant="outlined"
                       format="YYYY-MM-DD"
                       onChange={(event) => {
-                        // console.log(dayjs(event).format("YYYY-MM-DD"));
                         handleChange("date", dayjs(event).format("YYYY-MM-DD"));
                       }}
                       value={dayjs(appt.date)}
@@ -338,8 +325,7 @@ const AppointmentPage = () => {
               </Stack>
             </Box>
           </Paper>
-        </Grid>
-        
+        </Grid>      
       </form>
     </>
   );

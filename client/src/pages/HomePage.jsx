@@ -1,4 +1,4 @@
-import React, {useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { styled, createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -14,12 +14,11 @@ import Stack from "@mui/material/Stack";
 import Title from "../components/Title";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 
 const HomePage = () => {
   const localHost = "http://localhost:8800";
-
   const navigate = useNavigate();
 
   const NavBar = styled(MuiAppBar, {
@@ -34,76 +33,67 @@ const HomePage = () => {
 
   const defaultTheme = createTheme();
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  // console.log("local storage current user: ", currentUser);
 
   const isManager = currentUser.isManager;
 
+  
+  // ---- Employee appointments ----
+  const [rowSelectionModel, setRowSelectionModel] = useState([]);
+  //  Appointment headers
   const appointmentColumns = [
     {
       field: "id",
       headerName: "ID",
-      width: 45,
     },
     {
       field: "date",
       headerName: "Date",
-      width: 100,
-      editable: true,
+      sortable: true,
       valueFormatter: (value) => dayjs(value).format("YYYY-MM-DD"),
     },
     {
       field: "startTime",
       headerName: "Start Time",
-      width: 100,
-      editable: true,
-      valueFormatter: (value)=> dayjs("2000-01-01 "+value).format("h:mm a")
+      valueFormatter: (value) => dayjs("2000-01-01 " + value).format("h:mm a"),
     },
     {
       field: "endTime",
       headerName: "End Time",
-      width: 100,
-      editable: true,
-      valueFormatter: (value)=> dayjs("2000-01-01 "+value).format("h:mm a")
+      valueFormatter: (value) => dayjs("2000-01-01 " + value).format("h:mm a"),
     },
     {
       field: "employeeId",
       headerName: "Employee",
-      sortable: false,
-      width: 120,
-      valueGetter: (value)=> {
-        if(value === currentUser.employeeId){
-          return (currentUser.firstName + " " + currentUser.lastName)
-        }else{
-           return getEmployeeName(value);
+      valueGetter: (value) => {
+        if (value === currentUser.employeeId) {
+          return currentUser.firstName + " " + currentUser.lastName;
+        } else {
+          return getFormattedEmployeeName(value);
         }
-      }
+      },
     },
     {
       field: "status",
       headerName: "Status",
-      width: 100,
-      editable: true,
     },
   ];
-
-  
-  // Get employee appointments
+  //  Appointment data
   const [appointmentList, setAppointmentList] = useState([]);
   useEffect(() => {
     const fetchAppointmentList = async () => {
       try {
+        var res = "";
         if (!isManager) {
-          const res = await axios.get(
+          res = await axios.get(
             localHost +
               "/employees/" +
               currentUser.employeeId +
               "/appointments/"
           );
-          setAppointmentList(res.data);
         } else {
-          const res = await axios.get(localHost + "/appointments/");
-          setAppointmentList(res.data);
+          res = await axios.get(localHost + "/appointments/");
         }
+        setAppointmentList(res.data);
       } catch (err) {
         console.log("Error retrieving appointment list: ", err);
       }
@@ -111,65 +101,62 @@ const HomePage = () => {
     fetchAppointmentList();
   }, []);
 
+  // ---- Employee availability ----
+  const [rowSelectionModelAvail, setRowSelectionModelAvail] = useState([]);
+  //  Availability headers
   const availabilityColumns = [
     {
       field: "id",
       headerName: "ID",
-      width: 1,
     },
     {
       field: "day",
       headerName: "Day",
       width: 100,
-      editable: true,
+      sortable: true,
     },
     {
       field: "startTime",
       headerName: "Start Time",
       width: 100,
-      editable: true,
-      valueFormatter: (value)=> dayjs("2000-01-01 "+value).format("h:mm a")
-
+      valueFormatter: (value) => dayjs("2000-01-01 " + value).format("h:mm a"),
     },
     {
       field: "endTime",
       headerName: "End Time",
       width: 100,
-      editable: true,
-      valueFormatter: (value)=> dayjs("2000-01-01 "+value).format("h:mm a")
+      valueFormatter: (value) => dayjs("2000-01-01 " + value).format("h:mm a"),
     },
     {
       field: "employeeId",
       headerName: "Employee",
-      sortable: false,
       width: 120,
-        valueGetter: (value)=> {
-          if(value === currentUser.employeeId){
-            return (currentUser.firstName + " " + currentUser.lastName)
-          }else{
-             return getEmployeeName(value);
-          }
+      valueGetter: (value) => {
+        if (value === currentUser.employeeId) {
+          return currentUser.firstName + " " + currentUser.lastName;
+        } else {
+          return getFormattedEmployeeName(value);
         }
       },
+    },
   ];
-
-  // Get employee availability
+  //  Availability data
   const [availabilityList, setAvailabilityList] = useState([]);
   useEffect(() => {
     const fetchAvailabilityList = async () => {
       try {
+        var res = "";
         if (!isManager) {
-          const res = await axios.get(
+          res = await axios.get(
             localHost +
               "/employees/" +
               currentUser.employeeId +
               "/availability/"
           );
-          setAvailabilityList(res.data);
         } else {
-          const res = await axios.get(localHost + "/availability/");
-          setAvailabilityList(res.data);
+          res = await axios.get(localHost + "/availability/");
         }
+        setAvailabilityList(res.data);
       } catch (err) {
         console.log("Error retrieving availability list: ", err);
       }
@@ -177,48 +164,87 @@ const HomePage = () => {
     fetchAvailabilityList();
   }, []);
 
-  const [employeeList, setEmployeeList] = useState([]);
+  // ---- Employee accounts ----
+  const [rowSelectionModelAcct, setRowSelectionModelAcct] = useState([]);
+  //  Account headers
+  const accountColumns = [
+    {
+      field: "id",
+      headerName: "ID",
+    },
+    {
+      field: "username",
+      headerName: "Username",
+    },
+    {
+      field: "isActive",
+      headerName: "Status",
+      valueGetter: (value) => {
+        return value ? "Enabled" : "Disabled";
+      },
+    },
+  ];
+  //  Account data
+  const [accountList, setAccountList] = useState([]);
+  
+  if (isManager) {
+    useEffect(() => {
+      const fetchAccountList = async () => {
+        try {
+          const res = await axios.get(localHost + "/accounts/");
+          setAccountList(res.data);
+        } catch (err) {
+          console.log("Error retrieving account list: ", err);
+        }
+      };
+      fetchAccountList();
+    }, [accountList]);
+  }
+
+// Details of employees who have appointments and/or availability on lists
+const [employeeList, setEmployeeList] = useState([]);
+if (isManager) {
   useEffect(() => {
-    if (!isManager) {
-      return;
-    }
     const fetchEmpNames = async () => {
-    var employeeNumbers = []
+      var employeeNumbers = [];
 
-    appointmentList.forEach((row)=>{
-      employeeNumbers.push(row.employeeId)
-    })
+      appointmentList.forEach((row) => {
+        employeeNumbers.push(row.employeeId);
+      });
+      availabilityList.forEach((row) => {
+        employeeNumbers.push(row.employeeId);
+      });
 
-    employeeNumbers = [...new Set(employeeNumbers)];
+      employeeNumbers = [...new Set(employeeNumbers)];
 
-    var res = ""
+      var res = "";
       try {
         if (isManager) {
           res = await axios.get(
-            localHost +
-              "/employees/names/" +
-              employeeNumbers
+            localHost + "/employees/names/" + employeeNumbers
           );
           setEmployeeList(res.data);
         }
       } catch (err) {
         console.log("Error retrieving employee names: ", err);
       }
-  }
-  fetchEmpNames();
-  },[appointmentList])
-
-  const getEmployeeName = (id)=>{
-    for (let i = 0; i < employeeList.length; i++) {
-      const item = employeeList[i].id
-      if(employeeList[i].id === id){
-        return employeeList[i].firstName + " " + employeeList[i].lastName
-      }
+    };
+    fetchEmpNames();
+  }, [appointmentList]);
+}
+// Formatted employee names for appointment list display
+const getFormattedEmployeeName = (id) => {
+  for (let i = 0; i < employeeList.length; i++) {
+    const item = employeeList[i].id;
+    if (employeeList[i].id === id) {
+      return employeeList[i].firstName + " " + employeeList[i].lastName;
     }
   }
-  
-  
-  // Get graph data - Appt Completed vs Cancelled
+};
+
+
+  // ---- Graph and Data ----
+  // Appt Completed vs Cancelled
   const [graph1Count, setGraph1Count] = useState([]);
   useEffect(() => {
     const fetchGraph1Data = async () => {
@@ -243,107 +269,78 @@ const HomePage = () => {
     fetchGraph1Data();
   }, [appointmentList]);
 
-  const [rowSelectionModel, setRowSelectionModel] = useState([]);
-  const [rowSelectionModelAvail, setRowSelectionModelAvail] = useState([]);
-
-  const handleDelete = async (rowSelectionModel, event) => {
-    const apptId = rowSelectionModel[0];
-    if (rowSelectionModel) {
-      if (window.confirm("Are you sure you wish to delete this appointment?")) {
-        const res = await axios.delete(localHost + "/appointments/" + apptId);
-        setAppointmentList(appointmentList.filter((row) => row.id !== apptId));
-      }
-    }
-  };
-
-  const handleDeleteAvail = async (rowSelectionModel, event) => {
-    const availId = rowSelectionModel[0];
-    if (rowSelectionModel) {
-      if (
-        window.confirm("Are you sure you wish to delete this availability?")
-      ) {
-        const res = await axios.delete(localHost + "/availability/" + availId);
-        setAvailabilityList(
-          availabilityList.filter((row) => row.id !== availId)
-        );
-      }
-    }
-  };
-  const [rowSelectionModelAcct, setRowSelectionModelAcct] = useState([]);
-  const accountColumns = [
-    {
-      field: "id",
-      headerName: "ID",
-      width: 1,
-    },
-    {
-      field: "username",
-      headerName: "Username",
-      width: 100,
-      editable: true,
-    },
-    {
-      field: "isActive",
-      headerName: "Status",
-      width: 100,
-      editable: true,
-      valueGetter: (value)=> {
-       return value? "Enabled":"Disabled"
-      }
-    
-    },
-    
-  ];
-
-  // Get employee availability
-  const [accountList, setAccountList] = useState([]);
-
-  if (isManager) {
-  useEffect(() => {
-    const fetchAccountList = async () => {
-      try {
-          const res = await axios.get(
-            localHost +
-              "/accounts/"   
-          );
-
-          setAccountList(res.data);
+  // Handle appointment and availability delete
+  const handleDelete = async (rowSelectionModel, list) => {
+    const id = rowSelectionModel[0];
+    if (id) {
+      if (list === "availability") {
+        try{
+          if (
+            window.confirm("Are you sure you wish to delete this availability?")
+          ) {
+            const res = await axios.delete(localHost + "/availability/" + id);
+            setAvailabilityList(availabilityList.filter((row) => row.id !== id));
+          }
+        }catch(err){
+          console.log("Error calculating deleting availability: ", err);
+        }
         
-      } catch (err) {
-        console.log("Error retrieving account list: ", err);
+      } else if (list === "appointment") {
+        if (
+          window.confirm("Are you sure you wish to delete this appointment?")
+        ) {
+          const res = await axios.delete(localHost + "/appointments/" + id);
+          setAppointmentList(appointmentList.filter((row) => row.id !== id));
+        }
       }
-    };
-    fetchAccountList();
-  }, []);
+    }
+  };
+
+  // Handle account enable/disable
+  const handleAccountManagement = async (rowSelectionModelAcct, newStatus) => {
+    const acctId = rowSelectionModelAcct[0];
+    var currentStatus = null;
+
+    if (acctId) {
+      for (let i = 0; i < accountList.length; i++) {
+        if (accountList[i].id == acctId) {
+          currentStatus = accountList[i].isActive;  
+          break;
+        }
+      }
+
+      if (currentStatus.length) {
+        console.log("Error managing account. Status unavailable");
+        return;
+      }
+      if (currentStatus == newStatus) {
+        window.alert("The account already has that status");
+        return;
+      }
+      if (window.confirm("Are you sure you wish to modify this account?")) {
+        const changeAccountStatus = async () => {
+          try {
+
+            const res = await axios.put(
+            localHost + "/accounts/"+acctId+"/"+
+            newStatus)
+          } catch (err) {
+            console.log("Error changing account status: ", err);
+          }
+        };
+        changeAccountStatus();
+      }
+    } else {
+      //no account selected
+      window.alert("An account must be selected");
+    }
+  };
+
+  const handleLogout = ()=>{
+    localStorage.removeItem("currentUser");
+    navigate("/");
   }
-
-
-  // const handleAccountManagement = async (action, rowSelectionModelAcct, event) => {
-  //   const acctId = rowSelectionModelAcct[0];
-
-    // if (acctId) {
-    //     for (let i = 0; i < accountList.length; i++) {
-    //       var currentStatus = accountList[i].isActive
-
-    //     }
-    //         return employeeList[i].firstName + " " + employeeList[i].lastName
-    //       }
-    //     }
-    //   }
-
-      // if (
-      //   window.confirm("Are you sure you wish to "+ action +" this availability?")
-      // ) {
-        
-      //   const res = await axios.put(localHost + "/accounts/" + acctId +"/"+action);
-      //   // setAvailabilityList(
-      //   //   availabilityList.filter((row) => row.id !== availId)
-      //   // );
-      // }
-    
-
-
-console.log("accountlist: ",accountList)
+  
   return (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: "flex" }}>
@@ -362,11 +359,7 @@ console.log("accountlist: ",accountList)
             </Typography>
             <Stack direction="row" spacing={2}>
               <Button
-                onClick={() => {
-                  console.log("< = Logout Button Clicked = >");
-                  localStorage.removeItem("currentUser");
-                  navigate("/");
-                }}
+                onClick={handleLogout}
                 variant="contained"
                 color="secondary"
               >
@@ -405,7 +398,10 @@ console.log("accountlist: ",accountList)
                     height: 475,
                   }}
                 >
-                  <Title>Appointments {currentUser.isManager ? " (All Employees)":""}</Title>
+                  <Title>
+                    Appointments{" "}
+                    {currentUser.isManager ? " (All Employees)" : ""}
+                  </Title>
                   <Box sx={{ height: 300, width: "100%" }}>
                     <DataGrid
                       checkboxSelection
@@ -417,6 +413,14 @@ console.log("accountlist: ",accountList)
                       disableDensitySelector
                       columns={appointmentColumns}
                       slots={{ toolbar: GridToolbar }}
+                      initialState={{
+                        pagination: {
+                          paginationModel: {
+                            pageSize: 5,
+                          },
+                        },
+                      }}
+                      pageSizeOptions={[5]}
                       slotProps={{
                         toolbar: {
                           showQuickFilter: true,
@@ -429,40 +433,39 @@ console.log("accountlist: ",accountList)
                         id: false,
                       }}
                     />
-                    <div>{rowSelectionModel}</div>
                     <Box sx={{ p: 2 }}>
-                      {/* <Link to="/appointment" style={{ textDecoration: "none" }} > */}
-                        <Button onClick={(event)=>{
-                          navigate("/appointment/");
-                        }}  sx={{visibility: !{currentUser}.isManager? "hidden":"visible" }} variant="contained">Add</Button>
-                      {/* </Link> */}
                       <Button
                         onClick={(event) => {
-                          console.log("rowselect: ", rowSelectionModel);
-                          console.log("length: ", rowSelectionModel.length);
+                          navigate("/appointment/");
+                        }}
+                        sx={{ visibility: isManager ? "hidden" : "visible" }}
+                        variant="contained"
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        onClick={(event) => {
                           if (rowSelectionModel.length) {
-                            handleDelete(rowSelectionModel, event);
                             navigate(`/appointment/${rowSelectionModel}`);
                           } else {
                             window.alert("An appointment must be selected");
                           }
                         }}
-                        sx={{visibility: !{currentUser}.isManager? "hidden":"visible" }} 
+                        sx={{ visibility: isManager ? "hidden" : "visible" }}
                         variant="contained"
                       >
                         Edit
                       </Button>
                       <Button
                         onClick={(event) => {
-                          console.log("rowselect: ", rowSelectionModel);
-                          console.log("length: ", rowSelectionModel.length);
                           if (rowSelectionModel.length) {
-                            handleDelete(rowSelectionModel, event);
+                            // handleDelete(rowSelectionModel, event);
+                            handleDelete(rowSelectionModel, "appointment");
                           } else {
                             window.alert("An appointment must be selected");
                           }
                         }}
-                        sx={{visibility: !{currentUser}.isManager? "hidden":"visible" }} 
+                        sx={{ visibility: isManager ? "hidden" : "visible" }}
                         variant="contained"
                       >
                         Delete
@@ -481,7 +484,10 @@ console.log("accountlist: ",accountList)
                     height: 475,
                   }}
                 >
-                  <Title>Availability {currentUser.isManager ? " (All Employees)":""}</Title>
+                  <Title>
+                    Availability{" "}
+                    {currentUser.isManager ? " (All Employees)" : ""}
+                  </Title>
                   <Box sx={{ height: 300, width: "100%" }}>
                     <DataGrid
                       rows={availabilityList}
@@ -519,126 +525,38 @@ console.log("accountlist: ",accountList)
                         onClick={(event) => {
                           navigate("/availability");
                         }}
-                        sx={{visibility: !{currentUser}.isManager? "hidden":"visible" }} 
+                        sx={{ visibility: isManager ? "hidden" : "visible" }}
                         variant="contained"
                       >
                         Add
                       </Button>
                       <Button
                         onClick={(event) => {
-                          console.log("rowselect: ", rowSelectionModelAvail);
-                          console.log(
-                            "length: ",
-                            rowSelectionModelAvail.length
-                          );
                           if (rowSelectionModelAvail.length) {
                             navigate(`/availability/${rowSelectionModelAvail}`);
                           } else {
                             window.alert("An availability must be selected");
                           }
                         }}
-                        sx={{visibility: !{currentUser}.isManager? "hidden":"visible" }} 
+                        sx={{ visibility: isManager ? "hidden" : "visible" }}
                         variant="contained"
                       >
                         Edit
                       </Button>
                       <Button
                         onClick={(event) => {
-                          console.log("rowselect: ", rowSelectionModelAvail);
-                          console.log(
-                            "length: ",
-                            rowSelectionModelAvail.length
-                          );
                           if (rowSelectionModelAvail.length) {
-                            handleDeleteAvail(rowSelectionModelAvail, event);
+                            handleDelete(rowSelectionModel, "availability");
                           } else {
                             window.alert("An availability must be selected");
                           }
                         }}
-                        sx={{visibility: !{currentUser}.isManager? "hidden":"visible" }} 
+                        sx={{ visibility: isManager ? "hidden" : "visible" }}
                         variant="contained"
                       >
                         Delete
                       </Button>
                     </Box>
-                  </Box>
-                </Paper>
-              </Grid>
-              {/*************************** Employee Accounts  ************************** */}
-              <Grid item xs={12} md={12} lg={12}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    // alignItems: "center",
-                  }}
-                >
-                  <Box>
-                    <Title>Employee Accounts</Title>
-                    <Box sx={{ width: "100%" }}>
-                    <DataGrid
-                      rows={accountList}
-                      columns={accountColumns}
-                      initialState={{
-                        pagination: {
-                          paginationModel: {
-                            pageSize: 5,
-                          },
-                        },
-                      }}
-                      pageSizeOptions={[5]}
-                      slots={{ toolbar: GridToolbar }}
-                      slotProps={{
-                        toolbar: {
-                          showQuickFilter: true,
-                        },
-                      }}
-                      onRowSelectionModelChange={(
-                        newRowSelectionModelAcct
-                      ) => {
-                        console.log("new selection: ",newRowSelectionModelAcct)
-                        setRowSelectionModelAcct(newRowSelectionModelAcct);
-                      }}
-                      disableColumnFilter
-                      disableColumnSelector
-                      disableDensitySelector
-                      checkboxSelection
-                      disableMultipleRowSelection={true}
-                      // columnVisibilityModel={{
-                      //   id: false,
-                      // }}
-                    />
-                    <Box sx={{ p: 1 }}>
-                      <Button
-                        onClick={(event) => {
-                          console.log(event)
-                          if (rowSelectionModelAcct.length) {
-                            handleAccountManagement("enable", rowSelectionModelAcct)
-                          } else {
-                            window.alert("An account must be selected");
-                          }
-                        }}
-                        sx={{visibility: {currentUser}.isManager? "hidden":"visible" }} 
-                        variant="contained"
-                      >
-                        Enable
-                      </Button>
-                      <Button
-                        onClick={(event) => {
-                          if (rowSelectionModelAcct.length) {
-                            handleAccountManagement("disable")
-                          } else {
-                            window.alert("An account must be selected");
-                          }
-                        }}
-                        sx={{visibility: {currentUser}.isManager? "hidden":"visible" }} 
-                        variant="contained"
-                      >
-                        Disable
-                      </Button>
-                    </Box>
-                  </Box>
                   </Box>
                 </Paper>
               </Grid>
@@ -652,7 +570,7 @@ console.log("accountlist: ",accountList)
                   }}
                 >
                   <Box>
-                  {/*************************** Graph #1  ************************** */}
+                    {/*************************** Graph #1  ************************** */}
                     <Title>Appointments: Completed vs Cancelled</Title>
                     <PieChart
                       series={[
@@ -676,6 +594,102 @@ console.log("accountlist: ",accountList)
                       width={400}
                       height={200}
                     />
+                  </Box>
+                </Paper>
+              </Grid>
+              {/*************************** Employee Accounts  ************************** */}
+              <Grid
+                item
+                xs={12}
+                md={12}
+                lg={12}
+                sx={{
+                  visibility: isManager ? "visible" : "hidden",
+                }}
+              >
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    // visibility: !isManager?  "visible":"hidden"
+                  }}
+                >
+                  <Box>
+                    <Title>Employee Accounts</Title>
+                    {/* <Box sx={{ width: "100%" }}> */}
+                    <Box>
+                      <DataGrid
+                        rows={accountList}
+                        columns={accountColumns}
+                        initialState={{
+                          pagination: {
+                            paginationModel: {
+                              pageSize: 5,
+                            },
+                          },
+                        }}
+                        pageSizeOptions={[5]}
+                        slots={{ toolbar: GridToolbar }}
+                        slotProps={{
+                          toolbar: {
+                            showQuickFilter: true,
+                          },
+                        }}
+                        onRowSelectionModelChange={(
+                          newRowSelectionModelAcct
+                        ) => {
+                          setRowSelectionModelAcct(newRowSelectionModelAcct);
+                        }}
+                        disableColumnFilter
+                        disableColumnSelector
+                        disableDensitySelector
+                        checkboxSelection
+                        disableMultipleRowSelection={true}
+                        columnVisibilityModel={{
+                          id: false,
+                        }}
+                      />
+                      <Box sx={{ p: 1 }}>
+                        <Button
+                          onClick={(event) => {
+                            if (rowSelectionModelAcct.length) {
+                              handleAccountManagement(
+                                rowSelectionModelAcct,
+                                1
+                              );
+                            } else {
+                              window.alert("An account must be selected");
+                            }
+                          }}
+                          sx={{
+                            visibility: isManager ? "visible" : "hidden",
+                          }}
+                          variant="contained"
+                        >
+                          Enable
+                        </Button>
+                        <Button
+                          onClick={(event) => {
+                            if (rowSelectionModelAcct.length) {
+                              handleAccountManagement(
+                                rowSelectionModelAcct,
+                                0
+                              );
+                            } else {
+                              window.alert("An account must be selected");
+                            }
+                          }}
+                          sx={{
+                            visibility: isManager ? "visible" : "hidden",
+                          }}
+                          variant="contained"
+                        >
+                          Disable
+                        </Button>
+                      </Box>
+                    </Box>
                   </Box>
                 </Paper>
               </Grid>

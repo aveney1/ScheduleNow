@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState} from "react";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
@@ -22,24 +22,16 @@ const LoginPage = () => {
   const { user, setUser } = useUserContext();
 
   const handleChange = (id, e) => {
-    console.log("< = handleChange triggered = >");
     setCred((prev) => ({ ...prev, [id]: e }));
   };
 
   const handleClick = (e) => {
-    console.log("< = handleClick triggered = >");
     navigate("/registration");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("< = handleSubmit triggered = >");
-    // console.log("Login - Submitted credentials =>: ", cred);
-
     var errorList = await validateForm(cred);
-
-    // console.log("Login - errorList: ", errorList);
-
     if (!Object.keys(errorList).length) {
       var res = "";
       var res1 = "";
@@ -47,8 +39,6 @@ const LoginPage = () => {
         res = await axios.get(
           localHost + "/login/" + cred.username + "/" + cred.password
         );
-
-        // console.log("Login - Account response: ", res, res.data);
         
         if (res.data.length === 0) {
           // No matching account
@@ -56,7 +46,6 @@ const LoginPage = () => {
 
         } else if (res.data.length === 1 && res.status === 200 && res.data[0].isActive) {
           // Active account found
-          console.log("Active account found")
 
         } else if (res.data[0].isActive != null && !(res.data[0].isActive)){
           // Inactive account
@@ -72,9 +61,7 @@ const LoginPage = () => {
         res1 = await axios.get(
           localHost + "/employees/" + res.data[0].id
         );
-        // console.log("Login - Employee response: ", res1, res1.data);
         if (res1.data.length === 1 && res.status === 200 && res.data[0]) {
-          console.log("Employee found")
 
           localStorage.setItem('currentUser', JSON.stringify({
             employeeId: res1.data[0].id,
@@ -101,7 +88,6 @@ const LoginPage = () => {
 
 
   const validateForm = async (cred) => {
-    console.log("< = Validating Form = >");
     const errors = {};
 
     if (!cred.username) {

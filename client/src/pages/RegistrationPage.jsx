@@ -11,7 +11,7 @@ import { FormControl, FormLabel, FormControlLabel, Radio } from "@mui/material";
 import { Link } from "react-router-dom";
 import { TextField } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
@@ -30,15 +30,9 @@ const RegistrationPage = () => {
   });
 
   const handleChange = (id, e) => {
-    // Handle form submission
-    console.log("handleChange triggered =>");
-    console.log(reg);
     setReg((prev) => ({ ...prev, [id]: e }));
-    console.log("after=>");
-    console.log(reg);
   };
   const handleClick = (e) => {
-    console.log("cancel clicked");
     navigate("/");
   };
   useEffect(() => {
@@ -46,7 +40,6 @@ const RegistrationPage = () => {
       try {
         const emails = [];
         const res = await axios.get(localHost + "/employees/");
-        console.log("useEffect triggered");
         for (let i = 0; i < res.data.length; i++) {
           emails.push(res.data[i].email);
         }
@@ -61,11 +54,11 @@ const RegistrationPage = () => {
       try {
         const usernames = [];
         const res = await axios.get(localHost + "/accounts/");
-        console.log("useEffect triggered");
+
         for (let i = 0; i < res.data.length; i++) {
           usernames.push(res.data[i].username);
         }
-        console.log(usernames);
+
         setAcctUsernames(usernames);
       } catch (err) {
         console.log("Error retrieving username details: " + err);
@@ -77,31 +70,22 @@ const RegistrationPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     var accountId = 0;
-    console.log("Submit has been clicked in registration");
-    console.log(reg);
+
     var errorList = await validateForm(reg);
     if (!Object.keys(errorList).length) {
       var res = "";
       try {
-        console.log("No Errors, Attempting post....");
+
         res = await axios.post(localHost + "/registration", reg);
-        console.log("res");
-        console.log(res);
 
         if (res.status === 200) {
-          console.log("Successful account creation, Attempting get....");
           res = await axios.get(localHost + "/accounts/" + reg.username);
-          console.log("res account id");
-          console.log(res);
           accountId = res.data;
         }
 
         if (res.status === 200) {
-          console.log("Successful account id retrieval, Attempting post....");
           res = await axios.post(localHost + "/employees/" + accountId, reg);
-          console.log(res);
         }
-        //navigate("/home")
       } catch (err) {
         console.log(err);
       }
@@ -126,9 +110,7 @@ const RegistrationPage = () => {
     if (!reg.password) {
       errors.password = "Password is required";
     }
-    // if(!reg.isManager){
-    //   errors.state = "Manager selection require"
-    // }
+
     if (empEmails.includes(reg.email)) {
       errors.email = "Email already in use";
     }
