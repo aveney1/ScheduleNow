@@ -2,7 +2,7 @@ import React from 'react'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from './pages/LoginPage'
 import RegistrationPage from './pages/RegistrationPage'
-import HomePage from './pages/HomePage'
+import HomePage from './pages/HomePage.jsx'
 import AppointmentPage from './pages/AppointmentPage'
 import AvailabilityPage from './pages/AvailabilityPage'
 import NotFound404 from './pages/NotFound404.jsx';
