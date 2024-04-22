@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {createTheme, ThemeProvider } from "@mui/material/styles";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
@@ -17,6 +17,7 @@ import AppointmentTable from "../components/AppointmentTable";
 import AvailabilityTable from "../components/AvailabilityTable";
 import CRUDButtons from "../components/CRUDButtons";
 import EmployeeTable from "../components/EmployeeTable";
+import Email from "../components/Email";
 
 const HomePage = () => {
   const localHost = "http://localhost:8800";
@@ -277,12 +278,15 @@ const HomePage = () => {
                       formatName={getFormattedEmployeeName}
                       rowReturnFunction={handleCallback}
                     />
-                    <CRUDButtons
-                      tableName={"appointment"}
-                      isManager={isManager}
-                      row={rowSelectionModel}
-                      rowReturnFunction={handleDeleteCallback}
-                    />
+                    <Box sx={{ p: 2 }}>
+                      <CRUDButtons
+                        tableName={"appointment"}
+                        isManager={isManager}
+                        row={rowSelectionModel}
+                        rowReturnFunction={handleDeleteCallback}
+                      />
+                      <Email isManager={isManager} row={rowSelectionModel} />
+                    </Box>
                   </Box>
                 </Paper>
               </Grid>
@@ -308,12 +312,14 @@ const HomePage = () => {
                       formatName={getFormattedEmployeeName}
                       rowReturnFunction={handleCallback}
                     />
-                    <CRUDButtons
-                      tableName={"availability"}
-                      isManager={isManager}
-                      row={rowSelectionModelAvail}
-                      rowReturnFunction={handleDeleteCallback}
-                    />
+                    <Box sx={{ p: 2 }}>
+                      <CRUDButtons
+                        tableName={"availability"}
+                        isManager={isManager}
+                        row={rowSelectionModelAvail}
+                        rowReturnFunction={handleDeleteCallback}
+                      />
+                    </Box>
                   </Box>
                 </Paper>
               </Grid>

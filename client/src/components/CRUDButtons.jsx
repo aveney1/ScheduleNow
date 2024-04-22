@@ -34,7 +34,8 @@ const CRUDButtons = (props) => {
   };
 
   return (
-    <Box sx={{ p: 2 }}>
+    <>
+    {/* <Box sx={{ p: 2 }}> */}
       <Button
         onClick={(event) => {
           navigate(`/${tableName}/`);
@@ -70,7 +71,8 @@ const CRUDButtons = (props) => {
       >
         Delete
       </Button>
-    </Box>
+    {/* </Box> */}
+    </>
   );
 };
 
