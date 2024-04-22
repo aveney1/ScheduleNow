@@ -238,10 +238,10 @@ app.put("/appointments/:id", (req, res) => {
     req.body.employeeId,
     req.body.customerId,
   ];
-
   db.query(q, [...values, appointmentId], (err, data) => {
     if (err) return res.json(err);
-    return res.json("Appointment has been updated successfully");
+    // return res.json("Appointment has been updated successfully");
+    return res.json(data);
   });
 });
 

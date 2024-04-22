@@ -63,6 +63,7 @@ const LoginPage = () => {
         );
         if (res1.data.length === 1 && res.status === 200 && res.data[0]) {
 
+          if(res.data[0].isActive){
           localStorage.setItem('currentUser', JSON.stringify({
             employeeId: res1.data[0].id,
             firstName: res1.data[0].firstName,
@@ -75,8 +76,12 @@ const LoginPage = () => {
             isActive: res.data[0].isActive,
           }
           ))
-         
           navigate("/home");
+        } else{
+          setFormErrors({ disabled: "Account is disabled" });
+        }
+
+          
 
         }
       }catch(err){

@@ -44,7 +44,7 @@ const AvailabilityPage = () => {
       errors.startTime = "Start Time must be before End Time";
     } else if (date1.getTime() < date2.getTime()) {
       //valid
-    } else {
+    } else if (date1.getTime() == date2.getTime()){
       errors.startTime = "Start Time cannot be the same as End Time";
     }
     

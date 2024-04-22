@@ -86,6 +86,8 @@ const RegistrationPage = () => {
         if (res.status === 200) {
           res = await axios.post(localHost + "/employees/" + accountId, reg);
         }
+        
+        navigate('/login')
       } catch (err) {
         console.log(err);
       }

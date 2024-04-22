@@ -32,6 +32,7 @@ const HomePage = () => {
   }));
 
   const defaultTheme = createTheme();
+  
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   const isManager = currentUser.isManager;
@@ -459,7 +460,6 @@ const getFormattedEmployeeName = (id) => {
                       <Button
                         onClick={(event) => {
                           if (rowSelectionModel.length) {
-                            // handleDelete(rowSelectionModel, event);
                             handleDelete(rowSelectionModel, "appointment");
                           } else {
                             window.alert("An appointment must be selected");
@@ -546,7 +546,7 @@ const getFormattedEmployeeName = (id) => {
                       <Button
                         onClick={(event) => {
                           if (rowSelectionModelAvail.length) {
-                            handleDelete(rowSelectionModel, "availability");
+                            handleDelete(rowSelectionModelAvail, "availability");
                           } else {
                             window.alert("An availability must be selected");
                           }

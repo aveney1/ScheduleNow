@@ -18,12 +18,16 @@ import { Select, MenuItem } from "@mui/material/";
 const AppointmentPage = () => {
 
   const localHost = "http://localhost:8800";
+  const navigate = useNavigate();
+  
   var { id } = useParams();
   id = Object(id).length ? id : null;
 
   const currentUser = JSON.parse(localStorage.getItem('currentUser'))
 
   const [formErrors, setFormErrors] = useState([]);
+
+  const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
 
   const [appt, setAppt] = useState({
     date: "",
@@ -34,9 +38,26 @@ const AppointmentPage = () => {
     status: "",
   });
 
-  const [customers, setCustomers] = useState([]);
-  const [rowSelectionModel, setRowSelectionModel] = React.useState([]);
+  // ---- Appointment Data ----
+  useEffect(() => {
+    const fetchApptDetails = async () => {
+      try {
+        if (id) {
+          const res1 = await axios.get(localHost + "/appointments/" + id);
+          setRowSelectionModel(res1.data[0].customerId);
+          res1.data[0].date = dayjs(res1.data[0].date).format("YYYY-MM-DD")
+          setAppt(res1.data[0]);
+   
+        }
+      } catch (err) {
+        console.log("Error retrieving appointment details: " + err);
+      }
+    };
+    fetchApptDetails();
+  }, []);
 
+  // ---- Customer list ----
+  // Customer headers
   const columns = [
     { field: "id", headerName: "ID", width: 45 },
     {
@@ -63,7 +84,23 @@ const AppointmentPage = () => {
     },
   ];
 
-  const rows = customers.map((row) => {
+  // Customer data
+  const [customerList, setCustomerList] = useState([]);
+
+  useEffect(() => {
+    const fetchCustomerList = async () => {
+      try {   
+        const res2 = await axios.get(localHost + "/customers/");
+        setCustomerList(res2.data);
+      } catch (err) {
+        console.log("Error retrieving customers: " + err);
+      }
+    };
+    fetchCustomerList();
+  }, []);
+
+
+    var rows = customerList.map((row) => {
     return {
       city: row.city,
       email: row.email,
@@ -75,29 +112,7 @@ const AppointmentPage = () => {
     };
   });
 
-  const navigate = useNavigate();
-
-  
-
-  useEffect(() => {
-    const fetchApptDetails = async () => {
-      try {
-        if (id) {
-          const res1 = await axios.get(localHost + "/appointments/" + id);
-          setRowSelectionModel(res1.data[0].customerId);
-          setAppt(res1.data[0]);
-   
-        }
-        const res2 = await axios.get(localHost + "/customers/");
-        setCustomers(res2.data);
-      } catch (err) {
-        console.log("Error retrieving appointment details: " + err);
-      }
-    };
-    fetchApptDetails();
-  }, []);
-
-
+  var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
   const handleChange = (id, e) => {
     setAppt((prev) => ({ ...prev, [id]: e }));
   };
@@ -138,7 +153,7 @@ const AppointmentPage = () => {
       errors.startTime = "Start Time must be before End Time";
     } else if (date1.getTime() < date2.getTime()) {
       //valid
-    } else {
+    } else if (date1.getTime() == date2.getTime()){
       errors.startTime = "Start Time cannot be the same as End Time";
     }
 
@@ -168,7 +183,6 @@ const AppointmentPage = () => {
     return errors;
   };
   var result = Object.keys(formErrors).map((key) => [formErrors[key]]);
-
   return (
     <>
       <form
